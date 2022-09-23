@@ -117,22 +117,45 @@ foreach ($hooks as $event => $hooks) {
 	}
 }
 
+
+function get_csv_array()
+{
+	$file = fopen(SD_CO_PATH . '/tech-accounts.csv', 'r');
+	$array = [];
+	while (($line = fgetcsv($file)) !== FALSE) {
+		//$line is an array of the csv elements
+		$code = $line[1];
+		$state = $line[0];
+		$address = $line[2];
+		$account = $line[4];
+		$array[$code] = [
+			'code' => $code,
+			'state' => $state,
+			'address' => $address,
+			'account' => $account,
+		];
+	}
+	fclose($file);
+
+	return 	$array;
+}
+
 /**
  * Undocumented function
  *
  * @param [type] $order_id
- * @param [type] $order
+ * @param WC_Order $order
  * @return void
  */
 function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 {
 
 	// $url = 'https://eotw38jsq4ccm0l.m.pipedream.net';
-	$url = 'http://shopdunk-integration.reach.com.vn/api/v1/orders';
+	$url = SD_API_ORDERS;
 	$version = str_replace('wp_api_', '', 'wp_api_v3');
 	$payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $order_id);
 
-	var_dump($payload);
+	// var_dump($payload);
 	// wp_remote_post($url, [
 	// 	'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
 	// 	'body'        => json_encode($payload),
@@ -150,8 +173,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 
 	$address = [$payload['billing']['address_1']];
 	$address[] = $payload['billing']['city'];
-	$address[] = $payload['billing']['city'];
-
+	$address[] = $payload['billing']['state'];
 
 	$odoo_data = [
 		'web_id' => $payload['id'],
@@ -165,6 +187,8 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 			"name" => trim($payload['billing']['first_name'] . ' ' . $payload['billing']['last_name']),
 			"phone" => $payload['billing']['phone'],
 			"email" => $payload['billing']['email'],
+			"state" => $payload['billing']['state'],
+			"city" => $payload['billing']['city'],
 			"address" => join(" ", $address),
 			"country" => "VN"
 		],
@@ -180,10 +204,16 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	]);
 
 
-	var_dump($odoo_data);
+	$bank_accounts = get_csv_array();
+	$body = json_decode(wp_remote_retrieve_body($r), true);
+	
+	if (isset($body['id'])) {
+		$order->update_meta_data('_odoo_order_id', $body['id']);
+		$order->update_meta_data('_odoo_order_payment_message', $body['payment_message']);
+		$order->save();
+	}
 
-	$body = wp_remote_retrieve_body($r);
-	var_dump(json_decode( $body, true ));
+
 }
 
 if (isset($_GET['debug'])) {
