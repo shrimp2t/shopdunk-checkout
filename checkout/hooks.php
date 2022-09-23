@@ -155,7 +155,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	$version = str_replace('wp_api_', '', 'wp_api_v3');
 	$payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $order_id);
 
-	var_dump($payload);
+	// var_dump($payload);
 	// wp_remote_post($url, [
 	// 	'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
 	// 	'body'        => json_encode($payload),
@@ -211,6 +211,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	}
 	$order->add_meta_data('_odoo_order__test', 'OK', true);
 	if (isset($_GET['debug'])) {
+		var_dump($payload);
 		var_dump($body);
 	}
 
