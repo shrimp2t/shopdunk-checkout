@@ -155,7 +155,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	$version = str_replace('wp_api_', '', 'wp_api_v3');
 	$payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $order_id);
 
-	// var_dump($payload);
+	var_dump($payload);
 	// wp_remote_post($url, [
 	// 	'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
 	// 	'body'        => json_encode($payload),
@@ -204,16 +204,20 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	]);
 
 
-	$bank_accounts = get_csv_array();
+	// $bank_accounts = get_csv_array();
 	$body = json_decode(wp_remote_retrieve_body($r), true);
-	
-	if (isset($body['id'])) {
-		$order->update_meta_data('_odoo_order_id', $body['id']);
-		$order->update_meta_data('_odoo_order_payment_message', $body['payment_message']);
-		$order->save();
+	if (!$order) {
+		$order = wc_get_order($order_id);
+	}
+	$order->add_meta_data('_odoo_order__test', 'OK', true);
+	if (isset($_GET['debug'])) {
+		var_dump($body);
 	}
 
-
+	if (isset($body['id'])) {
+		$order->add_meta_data('_odoo_order_id', $body['id'], true);
+		$order->add_meta_data('_odoo_order_payment_message', $body['payment_message'], true);
+	}
 }
 
 if (isset($_GET['debug'])) {

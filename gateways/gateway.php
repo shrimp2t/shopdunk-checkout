@@ -38,7 +38,7 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 				'title' 		=> __('Method Title', 'woocommerce-other-payment-gateway'),
 				'type' 			=> 'text',
 				'description' 	=> __('This controls the title', 'woocommerce-other-payment-gateway'),
-				'default'		=> __('Custom Payment', 'woocommerce-other-payment-gateway'),
+				'default'		=> __('Chuyển khoảng ngân hàng', 'woocommerce-other-payment-gateway'),
 				'desc_tip'		=> true,
 			),
 			'description' => array(
@@ -139,7 +139,7 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 
 		// we received the payment
 		// $order->payment_complete();
-		
+
 		// some notes to customer (replace true with false to make it private)
 		// $order->add_order_note('Hey, your order is paid! Thank you!', true);
 
@@ -163,13 +163,32 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 
 	public function payment_fields()
 	{
+
+		global $wp;
+
+		$order = null;
+
+		if (isset($wp->query_vars['order-pay'])) {
+			$order = wc_get_order($wp->query_vars['order-pay']);
+		}
 	?>
 		<fieldset>
 			<p class="form-row form-row-wide">
 				<label for="<?php echo $this->id; ?>-admin-note"><?php echo ($this->description); ?> <?php if ($this->text_box_required === 'yes') : ?> <span class="required">*</span> <?php endif; ?></label>
-				<?php if ($this->hide_text_box !== 'yes') { ?>
-					<textarea id="<?php echo $this->id; ?>-admin-note" class="input-text" type="text" name="<?php echo $this->id; ?>-admin-note"></textarea>
-				<?php } ?>
+				<?php
+				if ($order) {
+
+
+					$odoo_order_id = $order->get_meta('_odoo_order_id');
+					$payment_message = $order->get_meta('_odoo_order_payment_message');
+
+
+				?>
+					Vui lòng chuyển khoán đến: <?php echo $payment_message ? $payment_message : $order->get_id(); ?>
+				<?php
+				}
+
+				?>
 			</p>
 			<div class="clear"></div>
 		</fieldset>
