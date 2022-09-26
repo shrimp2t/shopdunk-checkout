@@ -168,29 +168,41 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 
 		$order = null;
 
-		if (isset($wp->query_vars['order-pay'])) {
-			$order = wc_get_order($wp->query_vars['order-pay']);
-		}
+		// if (isset($wp->query_vars['order-pay'])) {
+		// 	$order = wc_get_order($wp->query_vars['order-pay']);
+		// }
+		global $sd_payment_order_extra;
 	?>
 		<fieldset>
 			<p class="form-row form-row-wide">
 				<label for="<?php echo $this->id; ?>-admin-note"><?php echo ($this->description); ?> <?php if ($this->text_box_required === 'yes') : ?> <span class="required">*</span> <?php endif; ?></label>
 				<?php
-				if ($order) {
+				if ($sd_payment_order_extra) {
 
-
-					$odoo_order_id = $order->get_meta('_odoo_order_id');
-					$payment_message = $order->get_meta('_odoo_order_payment_message');
-
-
+					$account_number =  $sd_payment_order_extra['store_data']['account'];
 				?>
-					Vui lòng chuyển khoán đến: <?php echo $payment_message ? $payment_message : $order->get_id(); ?>
+					<p>
+						<img src="https://img.vietqr.io/image/970407-<?php echo esc_attr($account_number) ?>-HHxRqO.jpg?amount=1000000&addInfo=" alt="" />
+					</p>
+					<p>
+						Số tài khoản: <?php echo esc_html($account_number); ?>
+					</p>
+					<p>
+						Ngân hàng: TECHCOMBANK - CN ĐÔNG ĐÔ, HÀ NỘI
+					</p>
+					<p>
+						Chủ tài khoản: CÔNG TY CỔ PHẦN HESMAN VIỆT NAM.
+					</p>
+					<p>
+						Nội dung chuyển khoản: <?php echo esc_html($sd_payment_order_extra['payment_message']); ?>
+					</p>
+
 				<?php
 				}
 
-				?>
-			</p>
-			<div class="clear"></div>
+		?>
+		</p>
+		<div class="clear"></div>
 		</fieldset>
 <?php
 	}

@@ -208,3 +208,62 @@ function sd_array_to_select_options($array, $label_field)
 	}
 	return $options;
 }
+
+
+/**
+ * Undocumented function
+ *
+ * @param WC_Order $order
+ * @return void
+ */
+function sd_get_order_extra_data($order)
+{
+	$stores = sd_get_data_stores();
+	$provinces = sd_get_data_provinces();
+	$quan_huyen = sd_get_data_quan_huyen();
+	$phuong_xa = sd_get_data_phuong_xa();
+
+	$store_id = $order->get_meta('_shipping_store_id', true);
+	$store_area = $order->get_meta('_shipping_store_area', true);
+	$shipping_method = $order->get_meta('_shipping_sd_method', true);
+	$billing_title = $order->get_meta('_billing_title', true);
+	$shipping_province = $order->get_meta('_shipping_province', true);
+	$shipping_quan_huyen = $order->get_meta('_shipping_quan_huyen', true);
+	$shipping_phuong_xa = $order->get_meta('_shipping_phuong_xa', true);
+	$odoo_order_id = $order->get_meta('_odoo_order_id', true);
+	$odoo_order_payment_message = $order->get_meta('_odoo_order_payment_message', true);
+
+
+	$address = '';
+	if ($order->get_billing_address_1()) {
+		$address =  $order->get_billing_address_1();
+	} else if ($order->get_shipping_address_1()) {
+		$address = $order->get_shipping_address_1();
+	}
+
+	
+
+
+	$extra =  [
+		'id' => $order->get_id(),
+		'odoo_order_id' => $odoo_order_id,
+		'payment_message' => $odoo_order_payment_message,
+		'store_id' => $store_id,
+		'store_name' => isset($stores[$store_id]) ? $stores[$store_id]['address'] : '',
+		'store_data' => isset($stores[$store_id]) ? $stores[$store_id] : false,
+		'billing_title' => $billing_title ? $billing_title : 'Anh',
+		'store_area' => $store_area,
+		'full_shipping_address' => '',
+		'shipping_method' => $shipping_method,
+		'province_id' => $shipping_province,
+		'province_name' => isset($provinces[$shipping_province]) ? $provinces[$shipping_province]['name'] : '',
+		'qh_id' => $shipping_quan_huyen,
+		'qh_name' => isset($quan_huyen[$shipping_quan_huyen]) ? $quan_huyen[$shipping_quan_huyen]['name'] : '',
+		'px_id' => $shipping_phuong_xa,
+		'px_name' => isset($phuong_xa[$shipping_phuong_xa]) ? $phuong_xa[$shipping_phuong_xa]['name'] : '',
+	];
+
+	$extra['full_shipping_address'] = join(', ', [$address, $extra['px_name'], $extra['qh_name'], $extra['province_name'] ]);
+
+	return $extra;
+}

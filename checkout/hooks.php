@@ -150,7 +150,8 @@ function sd_checkout_fields($groups)
 			'Chị' => 'Chị',
 		],
 		'class' => 'form-row-wide',
-		'default' => 'anh',
+		'default' => 'Anh',
+		'value' => 'Anh',
 		'required' => true,
 		'priority' => 4,
 	];
@@ -374,7 +375,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	$shipping_phuong_xa = $order->get_meta('_shipping_phuong_xa', true);
 
 	$notes = [
-		'customer_note' => $payload['customer_note'],
+		'customer_note' => 'Khách hàng ghi chú:' . $payload['customer_note'],
 	];
 
 	$billing = [
@@ -416,8 +417,10 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 
 		$notes = [
 			'shipping_method' => "Phương thức nhận hàng: Giao tận nơi.",
-			'shipping_address' => "Địa chỉ giao hàng: " . join( ', ', $address_array ),
+			'shipping_address' => "Địa chỉ giao hàng: " . join(', ', $address_array),
 		];
+
+		$store_id = '999'; // Default store
 	} else {
 		$notes = [
 			'shipping_method' => "Phương thức nhận hàng: Giao tại cửa hàng.",
@@ -441,26 +444,31 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 		'note_items' => [],
 	];
 
-	$r = wp_remote_post($url, [
-		'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
-		'body'        => json_encode($odoo_data),
-		'method'      => 'POST',
-		'data_format' => 'body',
-	]);
+	// $r = wp_remote_post($url, [
+	// 	'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
+	// 	'body'        => json_encode($odoo_data),
+	// 	'method'      => 'POST',
+	// 	'data_format' => 'body',
+	// ]);
 
 
 	// $bank_accounts = get_csv_array();
 	// $body = json_decode(wp_remote_retrieve_body($r), true);
 
+	$body['id'] = rand(1111111, 9999999);
+	$body['payment_message'] = 'M668' .$store_id. $body['id'];
+
 	$order->add_meta_data('_odoo_order__test', 'OK', true);
 	if (isset($_GET['debug'])) {
 		var_dump($payload);
+		var_dump($body);
 		var_dump($odoo_data);
 	}
 
 	if (isset($body['id'])) {
 		$order->add_meta_data('_odoo_order_id', $body['id'], true);
 		$order->add_meta_data('_odoo_order_payment_message', $body['payment_message'], true);
+		$order->save_meta_data();
 	}
 }
 
