@@ -19,7 +19,7 @@
 defined('ABSPATH') || exit;
 
 $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-$order_button_text = 'Thanh toán';
+// $order_button_text = 'Thanh toán';
 ?>
 <form id="order_review" method="post">
 

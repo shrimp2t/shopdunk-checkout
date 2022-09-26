@@ -23,7 +23,7 @@ if (!wp_doing_ajax()) {
 }
 
 
-$order_button_text  = 'Đặt Hàng';
+// $order_button_text  = 'Đặt Hàng';
 
 
 ?>

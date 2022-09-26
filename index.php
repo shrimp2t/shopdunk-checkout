@@ -11,11 +11,15 @@
 
 
 define('SD_CO_PATH',  dirname(__FILE__));
+define('SD_CO_URL', plugin_dir_url(__FILE__));
 
 define('SD_API_ORDERS', 'http://shopdunk-integration.reach.com.vn/api/v1/orders');
 
 
+
 add_action('plugins_loaded', function () {
+	require dirname(__FILE__) . '/inc/functions.php';
+	require dirname(__FILE__) . '/inc/form-field.php';
 	require dirname(__FILE__) . '/checkout/hooks.php';
 	require dirname(__FILE__) . '/gateways/contact.php';
 	require dirname(__FILE__) . '/gateways/gateway.php';

@@ -4,6 +4,16 @@
 add_action('wp_enqueue_scripts', function () {
 	if (is_checkout()) {
 		wp_enqueue_script('wc-cart');
+		wp_enqueue_style('sd-checkout', SD_CO_URL . '/assets/css/checkout.css');
+		wp_enqueue_script('sd-checkout', SD_CO_URL . '/assets/js/checkout.js', ['jquery'], false, true);
+
+		$stores = sd_get_data_stores();
+		wp_localize_script('sd-checkout', 'SD_Checkout', [
+			'stores' => $stores,
+			'provinces' => sd_get_data_provinces(),
+			'quan_huyen' => sd_get_data_quan_huyen(),
+			'phuong_xa' => sd_get_data_phuong_xa(),
+		]);
 	}
 }, 999);
 
@@ -118,27 +128,198 @@ foreach ($hooks as $event => $hooks) {
 }
 
 
-function get_csv_array()
-{
-	$file = fopen(SD_CO_PATH . '/tech-accounts.csv', 'r');
-	$array = [];
-	while (($line = fgetcsv($file)) !== FALSE) {
-		//$line is an array of the csv elements
-		$code = $line[1];
-		$state = $line[0];
-		$address = $line[2];
-		$account = $line[4];
-		$array[$code] = [
-			'code' => $code,
-			'state' => $state,
-			'address' => $address,
-			'account' => $account,
-		];
-	}
-	fclose($file);
 
-	return 	$array;
+
+/**
+ * @see woocommerce_form_field()
+ */
+function sd_checkout_fields($groups)
+{
+
+	// $groups['billing']['label'] ='Thông tin khách hàng';
+	// foreach ($groups  as $id => $f) {
+	// 	var_dump($id);
+	// 	var_dump($f);
+	// }
+
+	$groups['billing']['billing_title'] = [
+		'label' => "Xưng danh",
+		'type' => "radio",
+		'options' => [
+			'Anh' => 'Anh',
+			'Chị' => 'Chị',
+		],
+		'class' => 'form-row-wide',
+		'default' => 'anh',
+		'required' => true,
+		'priority' => 4,
+	];
+
+	$groups['billing']['billing_first_name']['class'] = 'form-row-wide';
+	$groups['shipping']['shipping_first_name']['class'] = 'form-row-wide';
+	$groups['shipping']['shipping_address_1']['required'] = false;
+	$groups['shipping']['shipping_state']['required'] = false;
+	$groups['billing']['billing_email']['required'] = false;
+
+	$groups['billing']['billing_country']['type'] = 'hidden';
+	$groups['billing']['billing_country']['value'] = 'VN';
+
+	unset($groups['billing']['billing_last_name']);
+	unset($groups['billing']['billing_company']);
+
+	unset($groups['billing']['billing_address_2']);
+	unset($groups['billing']['billing_postcode']);
+	unset($groups['billing']['billing_state']);
+	unset($groups['billing']['billing_address_1']);
+	unset($groups['billing']['billing_city']);
+
+
+	unset($groups['shipping']['shipping_first_name']);
+	unset($groups['shipping']['shipping_last_name']);
+	unset($groups['shipping']['shipping_company']);
+	unset($groups['shipping']['shipping_country']);
+	unset($groups['shipping']['shipping_address_2']);
+	unset($groups['shipping']['shipping_postcode']);
+	unset($groups['shipping']['shipping_city']);
+	unset($groups['shipping']['shipping_state']);
+
+
+	$groups['shipping']['shipping_sd_method'] = [
+		'label' => "Nhận hàng",
+		'type' => "radio",
+		'class' => 'form-row-wide',
+		'options' => [
+			'store' => 'Nhận tại cửa hàng',
+			'ship' => 'Giao tận nơi',
+		],
+		'default' => 'store',
+		'required' => false,
+		'priority' => 5,
+	];
+
+	$stores = sd_get_data_stores();
+	// $options = sd_array_to_select_options($stores, 'address');
+	$store_groups_options = sd_groups_for_select_by($stores, 'address', 'province', 'all');
+
+	$groups['shipping']['shipping_store_area'] = [
+		'label' => "Khu vực",
+		'type' => "select",
+		'class' => 'form-row-wide',
+		'options' => $store_groups_options['options'],
+		'default' => 'Hà Nội',
+		'required' => false,
+		'priority' => 6,
+	];
+
+
+
+	$groups['shipping']['shipping_store_id'] = [
+		'label' => "Chọn cửa hàng",
+		'type' => "select",
+		'class' => 'form-row-wide',
+		'options' => $store_groups_options['groups']['Hà Nội']['options'],
+		'default' => '001',
+		'required' => false,
+		'priority' => 7,
+	];
+
+
+	$provinces = sd_array_to_select_options(sd_get_data_provinces(), 'name');
+
+	$groups['shipping']['shipping_province'] = [
+		'label' => "Tỉnh/Thành Phố",
+		'type' => "select",
+		'class' => 'form-row-wide',
+		'options' => $provinces,
+		'default' => '01',
+		'required' => false,
+		'priority' => 7,
+	];
+
+
+	$groups['shipping']['shipping_quan_huyen'] = [
+		'label' => "Quận/huyện",
+		'type' => "select",
+		'class' => 'form-row-wide',
+		'options' => [
+			'' => 'Chọn quận/huyện',
+		],
+		'default' => '',
+		'required' => false,
+		'priority' => 7,
+	];
+	$groups['shipping']['shipping_phuong_xa'] = [
+		'label' => "Phường/Xã",
+		'type' => "select",
+		'class' => 'form-row-wide',
+		'options' => [
+			'' => 'Chọn phường/xã',
+		],
+		'default' => '',
+		'required' => false,
+		'priority' => 7,
+	];
+
+
+
+
+
+
+	return $groups;
 }
+
+add_filter('woocommerce_checkout_fields', 'sd_checkout_fields');
+
+
+add_filter('woocommerce_cart_needs_shipping', '__return_true');
+
+
+
+function sd_add_checkout_data($data)
+{
+
+
+	$shipping_method = isset($_POST['shipping_sd_method']) ? wc_clean($_POST['shipping_sd_method']) : 'store';
+	$title = isset($_POST['billing_title']) ? wc_clean($_POST['billing_title']) : 'mr';
+
+	if (!is_array($data['billing'])) {
+		$data['billing'] = [];
+	}
+	if (!is_array($data['shipping'])) {
+		$data['shipping'] = [];
+	}
+
+	$data['billing']['country'] = 'VN';
+	$data['billing']['title'] = $title;
+	$data['billing']['state'] = isset($_POST['']) ? '' : '';
+	$data['billing']['postcode'] = '';
+	$data['billing']['city'] = '';
+
+
+	$data['shipping']['sd_method'] = $shipping_method;
+
+	$data['shipping']['country'] = 'VN';
+	$data['shipping']['title'] = $title;
+	$data['shipping']['state'] = '';
+	$data['shipping']['postcode'] = '';
+	$data['shipping']['city'] = '';
+
+	if ($shipping_method != 'ship') {
+		$data['shipping']['store_area'] = isset($_POST['shipping_store_area']) ? wc_clean($_POST['shipping_store_area']) : '';
+		$data['shipping']['store_id'] = isset($_POST['shipping_store_id']) ? wc_clean($_POST['shipping_store_id']) : '';
+	} else {
+		$data['shipping']['quan_huyen'] = isset($_POST['shipping_quan_huyen']) ? wc_clean($_POST['shipping_quan_huyen']) : '';
+		$data['shipping']['province'] = isset($_POST['shipping_province']) ? wc_clean($_POST['shipping_province']) : '';
+		$data['shipping']['phuong_xa'] = isset($_POST['shipping_phuong_xa']) ? wc_clean($_POST['shipping_phuong_xa']) : '';
+	}
+
+	return  $data;
+}
+
+// add_filter('woocommerce_checkout_posted_data', 'sd_add_checkout_data',  9999);
+
+
+
 
 /**
  * Undocumented function
@@ -175,27 +356,87 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 		];
 	}
 
-	$address = [$payload['billing']['address_1']];
-	$address[] = $payload['billing']['city'];
-	$address[] = $payload['billing']['state'];
+	$provinces = sd_get_data_provinces();
+	$quan_huyen = sd_get_data_quan_huyen();
+	$phuong_xa = sd_get_data_phuong_xa();
+	$address_array = [];
+	// $address = [$payload['billing']['address_1']];
+	// $address[] = $payload['billing']['city'];
+	// $address[] = $payload['billing']['state'];
+
+
+	$store_id = $order->get_meta('_shipping_store_id', true);
+	$store_area = $order->get_meta('_shipping_store_area', true);
+	$shipping_method = $order->get_meta('_shipping_sd_method', true);
+	$billing_title = $order->get_meta('_billing_title', true);
+	$shipping_province = $order->get_meta('_shipping_province', true);
+	$shipping_quan_huyen = $order->get_meta('_shipping_quan_huyen', true);
+	$shipping_phuong_xa = $order->get_meta('_shipping_phuong_xa', true);
+
+	$notes = [
+		'customer_note' => $payload['customer_note'],
+	];
+
+	$billing = [
+		'title' => $billing_title,
+		"name" => trim($payload['billing']['first_name'] . ' ' . $payload['billing']['last_name']),
+		"phone" => $payload['billing']['phone'],
+		"email" => $payload['billing']['email'],
+		"state" => '',
+		"city" => '',
+		"address" => '',
+		"country" => "VN"
+	];
+
+	if ($shipping_method == 'ship') {
+		$billing['state'] = absint($shipping_province);
+		$billing['city'] = absint($shipping_quan_huyen);
+		$address = '';
+		if ($payload['billing']['address_1']) {
+			$address_array[] = $payload['billing']['address_1'];
+			$address = $payload['billing']['address_1'];
+		} else if ($payload['shipping']['address_1']) {
+			$address_array[] = $payload['shipping']['address_1'];
+			$address = $payload['shipping']['address_1'];
+		}
+
+		if ($shipping_phuong_xa && isset($phuong_xa[$shipping_phuong_xa])) {
+			$address_array[] = 'Phường/xã: ' . $phuong_xa[$shipping_phuong_xa]['name'];
+			$address .= ', ' . $phuong_xa[$shipping_phuong_xa]['name'];
+		}
+
+		if ($shipping_quan_huyen && isset($quan_huyen[$shipping_quan_huyen])) {
+			$address_array[] = 'Quận/Huyện: ' . $quan_huyen[$shipping_quan_huyen]['name'];
+		}
+		if ($shipping_province && isset($quan_huyen[$shipping_province])) {
+			$address_array[] = 'Tỉnh/Tp: ' . $provinces[$shipping_province]['name'];
+		}
+
+		$billing['address'] = $address;
+
+		$notes = [
+			'shipping_method' => "Phương thức nhận hàng: Giao tận nơi.",
+			'shipping_address' => "Địa chỉ giao hàng: " . join( ', ', $address_array ),
+		];
+	} else {
+		$notes = [
+			'shipping_method' => "Phương thức nhận hàng: Giao tại cửa hàng.",
+		];
+	}
+
+	$shipping = $billing;
+	$shipping['method'] = $shipping_method;
 
 	$odoo_data = [
 		'web_id' => $payload['id'],
 		'created_via' => 'webshop',
-		'pos_id' => $order->get_meta( '_odoo_pos_id', true ),
+		'pos_id' => $store_id,
 		'customer_id' => '',
-		'customer_note' => $payload['customer_note'],
+		'customer_note' => join("\n", $notes),
 		'status' => 'quotation',
 		'currency' => 'VND',
-		'billing' => [
-			"name" => trim($payload['billing']['first_name'] . ' ' . $payload['billing']['last_name']),
-			"phone" => $payload['billing']['phone'],
-			"email" => $payload['billing']['email'],
-			"state" => $payload['billing']['state'],
-			"city" => $payload['billing']['city'],
-			"address" => join(" ", $address),
-			"country" => "VN"
-		],
+		'billing' => $billing,
+		'shipping' => $shipping,
 		'line_items' => $data_lines,
 		'note_items' => [],
 	];
@@ -209,12 +450,12 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 
 
 	// $bank_accounts = get_csv_array();
-	$body = json_decode(wp_remote_retrieve_body($r), true);
-	
+	// $body = json_decode(wp_remote_retrieve_body($r), true);
+
 	$order->add_meta_data('_odoo_order__test', 'OK', true);
 	if (isset($_GET['debug'])) {
 		var_dump($payload);
-		var_dump($body);
+		var_dump($odoo_data);
 	}
 
 	if (isset($body['id'])) {
@@ -225,7 +466,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 
 if (isset($_GET['debug'])) {
 	add_action('wp', function () {
-		sd_send_order_to_odoo_webhook(2305);
+		sd_send_order_to_odoo_webhook($_GET['debug']);
 		die();
 	});
 }
