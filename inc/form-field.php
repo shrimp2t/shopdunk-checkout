@@ -219,7 +219,7 @@ if (!function_exists('woocommerce_form_field')) {
 			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;
 
 			if ($args['description']) {
-				$field_html .= '<span class="description" id="' . esc_attr($args['id']) . '-description" aria-hidden="true">' . wp_kses_post($args['description']) . '</span>';
+				$field_html .= '<span class="desc-txt" id="' . esc_attr($args['id']) . '-description" aria-hidden="true">' . wp_kses_post($args['description']) . '</span>';
 			}
 
 			$field_html .= '</span>';

@@ -18,9 +18,38 @@ jQuery(function ($) {
 
 	});
 
+	$( '#more_shipping_info' ).on( 'change', function( e ) {
+		const v = $( this ).is( ':checked' ) ? true: false;
+		if ( v ) {
+			$( '.more_shipping_field' ).show();
+		} else {
+			$( '.more_shipping_field' ).hide();
+		}
+	} ) ;
+
+	$( '#vat_check' ).on( 'change', function( e ) {
+		const v = $( this ).is( ':checked' ) ? true: false;
+		if ( v ) {
+			$( '.vat_field' ).show();
+		} else {
+			$( '.vat_field' ).hide();
+		}
+	} ) ;
+
+	$( '#secondary_check' ).on( 'change', function( e ) {
+		const v = $( this ).is( ':checked' ) ? true: false;
+		if ( v ) {
+			$( '.secondary_ps_field' ).show();
+		} else {
+			$( '.secondary_ps_field' ).hide();
+		}
+	} ) ;
+
+	$( '#secondary_check, #vat_check, #more_shipping_info' ).trigger( 'change' );
+
+
 	$('#shipping_sd_method_field input[name="shipping_sd_method"]').on('change', function () {
 		const m = $('#shipping_sd_method_field input[name="shipping_sd_method"]:checked').val();
-
 		if (m === 'ship') {
 			$('#shipping_store_id_field, #shipping_store_area_field').hide();
 			$('#shipping_province_field, #shipping_quan_huyen_field, #shipping_phuong_xa_field, #shipping_address_1_field').show();
@@ -54,10 +83,8 @@ jQuery(function ($) {
 			if (!aOptions.length) {
 				aOptions.push(defaultOpt);
 			}
-
 			$('#shipping_store_id').html(aOptions.join(' '));
 		}
-
 
 	});
 

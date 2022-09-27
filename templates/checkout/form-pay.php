@@ -26,6 +26,9 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 $extra = sd_get_order_extra_data($order);
 $GLOBALS['sd_payment_order_extra'] = $extra;
 
+
+var_dump( WC()->session->get( 'last_odoo' ) );
+
 ?>
 <form id="order_review" method="post">
 

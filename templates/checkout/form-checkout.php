@@ -40,12 +40,36 @@ wc_get_template('cart/cart.php');
 		<?php do_action('woocommerce_checkout_before_customer_details'); ?>
 
 		<div class="col2-set-a" id="customer_details">
-			<?php do_action('woocommerce_checkout_billing'); ?>
 
+			<?php $fields = $checkout->get_checkout_fields('secondary'); ?>
+			<?php if ($fields) : ?>
+				<div class="sd-products-secondary-fields__field-wrapper">
+					<?php
+
+					foreach ($fields as $key => $field) {
+						woocommerce_form_field($key, $field, $checkout->get_value($key));
+					}
+					?>
+				</div>
+			<?php endif; ?>
+
+			<?php do_action('woocommerce_checkout_billing'); ?>
 			<?php do_action('woocommerce_checkout_shipping'); ?>
+
 		</div>
 
 		<?php do_action('woocommerce_checkout_after_customer_details'); ?>
+
+		<?php $fields = $checkout->get_checkout_fields('more'); ?>
+		<?php if ($fields) : ?>
+			<div class="sd-more-fields__field-wrapper">
+				<?php
+				foreach ($fields as $key => $field) {
+					woocommerce_form_field($key, $field, $checkout->get_value($key));
+				}
+				?>
+			</div>
+		<?php endif; ?>
 
 	<?php endif; ?>
 
