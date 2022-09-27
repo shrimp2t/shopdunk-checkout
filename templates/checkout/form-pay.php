@@ -25,6 +25,7 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 // $order_button_text = 'Thanh toán';
 $extra = sd_get_order_extra_data($order);
 $GLOBALS['sd_payment_order_extra'] = $extra;
+
 ?>
 <form id="order_review" method="post">
 
@@ -51,33 +52,30 @@ $GLOBALS['sd_payment_order_extra'] = $extra;
 
 	<?php
 	$allow_pay = sd_allow_partial_pay($order);
+
+	$part_amount =  get_option('sd_partial_order_amount');
+
 	?>
-
-	<?php if ( $allow_pay ) { ?>
-	<div class="checkout-box payment-order-amount">
-
-		<h2>Chọn số tiền muốn thanh toán</h2>
-
-	
-		<div>
-			<label class="amount-box">
-				<input type="radio" checked name="pay_amount" value="part">
-				<span>Thanh toán trước</span>
-				<span class="amount"><?php echo wc_price(1000000); ?></span>
-			</label>
-			<label class="amount-box">
-				<input type="radio" name="pay_amount" value="all">
-				<span>Toàn bộ đơn hàng</span>
-				<span class="amount"><?php echo wc_price($order->get_total()); ?></span>
-			</label>
+	<?php if ($allow_pay) { ?>
+		<div class="checkout-box payment-order-amount">
+			<h2>Chọn số tiền muốn thanh toán</h2>
+			<div>
+				<label class="amount-box">
+					<input type="radio" checked name="pay_amount" value="part">
+					<span>Thanh toán trước</span>
+					<span class="amount"><?php echo wc_price($part_amount); ?></span>
+				</label>
+				<label class="amount-box">
+					<input type="radio" name="pay_amount" value="all">
+					<span>Toàn bộ đơn hàng</span>
+					<span class="amount"><?php echo wc_price($order->get_total()); ?></span>
+				</label>
+			</div>
 		</div>
-	</div>
-
 	<?php } ?>
 
 
-
-	<div class="checkout-box  payment-box">
+	<div id="checkout-payment-gate-ways" class="checkout-box  payment-box">
 		<h2>Phương thức thanh toán</h2>
 		<div id="payment">
 			<?php if ($order->needs_payment()) : ?>
@@ -93,7 +91,6 @@ $GLOBALS['sd_payment_order_extra'] = $extra;
 					?>
 				</ul>
 			<?php endif; ?>
-
 		</div>
 	</div>
 

@@ -71,7 +71,7 @@ $totals = $order->get_order_item_totals();
 			</div>
 
 			<div class="order-box">
-				<div class="order-box-l">Sản phẩm đã thanh toán()</div>
+				<div class="order-box-l">Sản phẩm đã thanh toán</div>
 				<div class="order-box-v">
 					<?php
 					$order_items = $order->get_items(apply_filters('woocommerce_purchase_order_item_types', 'line_item'));

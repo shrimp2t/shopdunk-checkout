@@ -47,7 +47,7 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 				'default' => '',
 				'description' 	=> __('The message which you want it to appear to the customer in the checkout page.', 'woocommerce-other-payment-gateway'),
 			),
-			
+
 		);
 	}
 	/**
@@ -95,15 +95,15 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 
 	public function validate_fields()
 	{
-		if ($this->text_box_required === 'no') {
-			return true;
-		}
+		// if ($this->text_box_required === 'no') {
+		// 	return true;
+		// }
 
-		$textbox_value = (isset($_POST['other_payment-admin-note'])) ? trim($_POST['other_payment-admin-note']) : '';
-		if ($textbox_value === '') {
-			wc_add_notice(__('Please, complete the payment information.', 'woocommerce-custom-payment-gateway'), 'error');
-			return false;
-		}
+		// $textbox_value = (isset($_POST['other_payment-admin-note'])) ? trim($_POST['other_payment-admin-note']) : '';
+		// if ($textbox_value === '') {
+		// 	wc_add_notice(__('Please, complete the payment information.', 'woocommerce-custom-payment-gateway'), 'error');
+		// 	return false;
+		// }
 		return true;
 	}
 
@@ -144,13 +144,6 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 	public function payment_fields()
 	{
 
-		global $wp;
-
-		$order = null;
-
-		// if (isset($wp->query_vars['order-pay'])) {
-		// 	$order = wc_get_order($wp->query_vars['order-pay']);
-		// }
 		global $sd_payment_order_extra;
 	?>
 		<fieldset>
@@ -159,25 +152,44 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 				<?php
 				if ($sd_payment_order_extra) {
 
-					$account_number =  $sd_payment_order_extra['store_data']['account'];
-				?>
-					<p>
-						<img src="https://img.vietqr.io/image/970407-<?php echo esc_attr($account_number) ?>-HHxRqO.jpg?amount=1000000&addInfo=" alt="" />
-					</p>
-					<p>
-						Số tài khoản: <?php echo esc_html($account_number); ?>
-					</p>
-					<p>
-						Ngân hàng: TECHCOMBANK - CN ĐÔNG ĐÔ, HÀ NỘI
-					</p>
-					<p>
-						Chủ tài khoản: CÔNG TY CỔ PHẦN HESMAN VIỆT NAM.
-					</p>
-					<p>
-						Nội dung chuyển khoản: <?php echo esc_html($sd_payment_order_extra['payment_message']); ?>
-					</p>
+					$store = get_option('sd_default_store');
+					$account_number = get_option('sd_default_bank_account');
+					$bank_name = get_option('sd_default_bank_name');
+					if ($sd_payment_order_extra['store_data']) {
+						$account_number =  $sd_payment_order_extra['store_data']['account'];
+						$bank_name = 'TECHCOMBANK - CN ĐÔNG ĐÔ, HÀ NỘI';
+					} else {
+					}
 
-				<?php
+					$payment_message = $sd_payment_order_extra['payment_message'];
+					if (!$payment_message) {
+						$payment_message = 'M668' . $store . $bank_name;
+					}
+
+					if ('part' == $sd_payment_order_extra['pay_method']) {
+						$amount = $sd_payment_order_extra['pay_amount'];
+					} else {
+						$amount = $sd_payment_order_extra['total'];
+					}
+
+				?>
+			<div class="checkout_qr">
+				<img src="https://img.vietqr.io/image/970407-<?php echo esc_attr($account_number) ?>-HHxRqO.jpg?amount=<?php echo esc_attr($amount); ?>&addInfo=<?php echo esc_attr($payment_message); ?>" alt="" />
+			</div>
+			<p>
+				Số tài khoản: <?php echo esc_html($account_number); ?>
+			</p>
+			<p>
+				Ngân hàng: <?php echo esc_html($bank_name); ?>
+			</p>
+			<p>
+				Chủ tài khoản: CÔNG TY CỔ PHẦN HESMAN VIỆT NAM.
+			</p>
+			<p>
+				Nội dung chuyển khoản: <?php echo esc_html($sd_payment_order_extra['payment_message']); ?>
+			</p>
+
+		<?php
 				}
 
 		?>

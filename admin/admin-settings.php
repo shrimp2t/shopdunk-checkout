@@ -42,6 +42,13 @@ function sd_checkout_settings( $settings, $current_section ) {
 		);
 
 		$settings[] = array(
+			'name'     => __( 'Odoo API Access Token', 'text-domain' ),
+			'id'       => 'sd_odoo_api_token',
+			'type'     => 'text',
+			'desc'     => __( 'API Token', 'text-domain' ),
+		);
+
+		$settings[] = array(
 			'name'     => __( 'Webhook URL(s)', 'text-domain' ),
 			'id'       => 'sd_webhook_urls',
 			'type'     => 'textarea',
@@ -66,6 +73,27 @@ function sd_checkout_settings( $settings, $current_section ) {
 			'id'       => 'sd_partial_order_amount',
 			'type'     => 'number',
 			'desc'     => __( 'Số tiền cọc', 'text-domain' ),
+		);
+
+		$settings[] = array(
+			'name'     => __( 'Store mặc định', 'text-domain' ),
+			'id'       => 'sd_default_store',
+			'type'     => 'text',
+			'desc'     => __( 'Id Store mặc định, 3 ký tự', 'text-domain' ),
+		);
+
+		$settings[] = array(
+			'name'     => __( 'TK ngân hàng của store mặc định', 'text-domain' ),
+			'id'       => 'sd_default_bank_account',
+			'type'     => 'text',
+			'desc'     => __( 'Tk ngân hàng của store mặc định.', 'text-domain' ),
+		);
+
+		$settings[] = array(
+			'name'     => __( 'Tên ngân hàng của store mặc định', 'text-domain' ),
+			'id'       => 'sd_default_bank_name',
+			'type'     => 'text',
+			'desc'     => __( 'Tên ngân hàng của store mặc định.', 'text-domain' ),
 		);
 		
 		$settings[] = array( 'type' => 'sectionend', 'id' => 'shopdunk_settings' );

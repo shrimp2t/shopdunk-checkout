@@ -367,6 +367,9 @@ function sd_woocommerce_before_pay_action($order)
 		WC()->session->set('_sd_pay_method', 'full');
 		$order->delete_meta_data('_sd_all_total');
 		$order->delete_meta_data('_sd_pay_amount');
+		WC()->session->set('_sd_all_total', null);
+		WC()->session->set('_sd_pay_amount', null);
+		WC()->session->set('_sd_pay_method', null);
 	}
 
 	add_filter('woocommerce_order_get_total', 'sd_change_order_total');
@@ -374,9 +377,11 @@ function sd_woocommerce_before_pay_action($order)
 }
 function sd_woocommerce_after_pay_action($order)
 {
-	unset(WC()->session['_sd_all_total']);
-	unset(WC()->session['_sd_pay_amount']);
-	unset(WC()->session['_sd_pay_method']);
+
+	WC()->session->set('_sd_all_total', null);
+	WC()->session->set('_sd_pay_amount', null);
+	WC()->session->set('_sd_pay_method', null);
+
 
 	remove_action('woocommerce_order_get_total', 'sd_change_order_total');
 	remove_action('woocommerce_payment_complete_order_status', 'sd_woocommerce_payment_complete_order_status');
@@ -408,7 +413,19 @@ foreach ($hooks as $event => $hooks) {
 	}
 }
 
-
+/**
+ * Undocumented function
+ *
+ * @param WP_REST_Response $data
+ * @return void
+ */
+function sd_woocommerce_rest_prepare_shop_order_object($response, $object)
+{
+	$extra = sd_get_order_extra_data($object);
+	$response->data['extra'] = $extra;
+	return $response;
+}
+add_filter('woocommerce_rest_prepare_shop_order_object', 'sd_woocommerce_rest_prepare_shop_order_object', 99, 3);
 
 /**
  * Undocumented function
@@ -420,8 +437,6 @@ foreach ($hooks as $event => $hooks) {
 function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 {
 
-	// $url = 'https://eotw38jsq4ccm0l.m.pipedream.net';
-	$url = get_option('sd_odoo_api_url');
 	$version = str_replace('wp_api_', '', 'wp_api_v3');
 	$payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $order_id);
 
@@ -437,36 +452,33 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	// 	'data_format' => 'body',
 	// ]);
 
+
 	$data_lines = [];
 	foreach ($payload['line_items'] as $item) {
 		$data_lines[] = [
 			'sku' => $item['sku'],
 			'price' => $item['price'],
+			"product_id" => "",
+			"variant_id" => "",
+			"quantity" => $item['quantity'],
+			"temp_price" => "",
+			"subtotal" => "",
+			"total_tax" => '',
+			"subtotal_tax" => '',
+			"discount_amount" => '',
+			"discount_percent" => '',
+			"total" => $item['total'],
+			"shipping_total" => '',
+			"discount_total" => '',
 		];
 	}
-
-	$provinces = sd_get_data_provinces();
-	$quan_huyen = sd_get_data_quan_huyen();
-	$phuong_xa = sd_get_data_phuong_xa();
-	$address_array = [];
-	// $address = [$payload['billing']['address_1']];
-	// $address[] = $payload['billing']['city'];
-	// $address[] = $payload['billing']['state'];
-
-	$store_id = $order->get_meta('_shipping_store_id', true);
-	$store_area = $order->get_meta('_shipping_store_area', true);
-	$shipping_method = $order->get_meta('_shipping_sd_method', true);
-	$billing_title = $order->get_meta('_billing_title', true);
-	$shipping_province = $order->get_meta('_shipping_province', true);
-	$shipping_quan_huyen = $order->get_meta('_shipping_quan_huyen', true);
-	$shipping_phuong_xa = $order->get_meta('_shipping_phuong_xa', true);
 
 	$notes = [
 		'customer_note' => 'Khách hàng ghi chú:' . $payload['customer_note'],
 	];
 
 	$billing = [
-		'title' => $billing_title,
+		'title' => $payload['extra']['billing_title'],
 		"name" => trim($payload['billing']['first_name'] . ' ' . $payload['billing']['last_name']),
 		"phone" => $payload['billing']['phone'],
 		"email" => $payload['billing']['email'],
@@ -476,9 +488,9 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 		"country" => "VN"
 	];
 
-	if ($shipping_method == 'ship') {
-		$billing['state'] = absint($shipping_province);
-		$billing['city'] = absint($shipping_quan_huyen);
+	if ($payload['extra']['shipping_method'] == 'ship') {
+		$billing['state'] = absint($payload['extra']['province_id']);
+		$billing['city'] = absint($payload['extra']['qh_id']);
 		$address = '';
 		if ($payload['billing']['address_1']) {
 			$address_array[] = $payload['billing']['address_1'];
@@ -488,26 +500,14 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 			$address = $payload['shipping']['address_1'];
 		}
 
-		if ($shipping_phuong_xa && isset($phuong_xa[$shipping_phuong_xa])) {
-			$address_array[] = 'Phường/xã: ' . $phuong_xa[$shipping_phuong_xa]['name'];
-			$address .= ', ' . $phuong_xa[$shipping_phuong_xa]['name'];
-		}
-
-		if ($shipping_quan_huyen && isset($quan_huyen[$shipping_quan_huyen])) {
-			$address_array[] = 'Quận/Huyện: ' . $quan_huyen[$shipping_quan_huyen]['name'];
-		}
-		if ($shipping_province && isset($quan_huyen[$shipping_province])) {
-			$address_array[] = 'Tỉnh/Tp: ' . $provinces[$shipping_province]['name'];
-		}
-
+		$address .= ', ' . $payload['extra']['px_name'];
 		$billing['address'] = $address;
-
 		$notes = [
 			'shipping_method' => "Phương thức nhận hàng: Giao tận nơi.",
-			'shipping_address' => "Địa chỉ giao hàng: " . join(', ', $address_array),
+			'shipping_address' => "Địa chỉ giao hàng: " . $payload['extra']['full_shipping_address'],
 		];
 
-		$store_id = '999'; // Default store
+		$store_id = ''; // Default store
 	} else {
 		$notes = [
 			'shipping_method' => "Phương thức nhận hàng: Giao tại cửa hàng.",
@@ -515,12 +515,13 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	}
 
 	$shipping = $billing;
-	$shipping['method'] = $shipping_method;
+	$shipping['method'] = $payload['extra']['shipping_method'];
 
 	$odoo_data = [
 		'web_id' => $payload['id'],
 		'created_via' => 'webshop',
 		'pos_id' => $store_id,
+		'seller_id' => '',
 		'customer_id' => '',
 		'customer_note' => join("\n", $notes),
 		'status' => 'quotation',
@@ -531,21 +532,25 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 		'note_items' => [],
 	];
 
+	$url = get_option('sd_odoo_api_url');
+	$token = get_option('sd_odoo_api_token');
+
 	$r = wp_remote_post($url, [
-		'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
+		'headers'     => array(
+			'Content-Type' => 'application/json; charset=utf-8',
+			'access-token' => $token
+		),
 		'body'        => json_encode($odoo_data),
 		'method'      => 'POST',
 		'data_format' => 'body',
 	]);
 
-	// $bank_accounts = get_csv_array();
 	$code = wp_remote_retrieve_response_code($r);
 	$body = json_decode(wp_remote_retrieve_body($r), true);
-	
+
 	$body['id'] = rand(1111111, 9999999);
 	$body['payment_message'] = 'M668' . $store_id . $body['id'];
 
-	$order->add_meta_data('_odoo_order__test', 'OK', true);
 	if (isset($_GET['debug'])) {
 		var_dump(get_option('sd_partial_order_amount'));
 		var_dump($order->get_status('edit'));
