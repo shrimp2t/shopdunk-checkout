@@ -287,7 +287,7 @@ function sd_checkout_fields($groups)
 			'label' => "Sản phẩm " . $i,
 			'type' => "text",
 			'class' => 'secondary_ps_field form-row-wide',
-			'default' => '',
+			'default' => sd_get_value_from_array( 'secondary_p' . $i . '_name', $session_data, '' ),
 			'required' => false,
 			'priority' => 7,
 		];
@@ -295,7 +295,7 @@ function sd_checkout_fields($groups)
 			'label' => "",
 			'type' => "text",
 			'class' => 'secondary_ps_field form-row-half',
-			'default' => '',
+			'default' => sd_get_value_from_array( 'secondary_p' . $i . '_color', $session_data, '' ),
 			'required' => false,
 			'priority' => 7,
 		];
@@ -303,7 +303,7 @@ function sd_checkout_fields($groups)
 			'label' => "",
 			'type' => "text",
 			'class' => 'secondary_ps_field form-row-half',
-			'default' => '',
+			'default' => sd_get_value_from_array( 'secondary_p' . $i . '_storage', $session_data, '' ),
 			'required' => false,
 			'priority' => 7,
 		];
@@ -316,7 +316,7 @@ function sd_checkout_fields($groups)
 		'label' => "Gọi người khác nhận hàng (nếu có)",
 		'type' => "checkbox",
 		'class' => 'form-row-wide',
-		'default' => '',
+		'default' => sd_get_value_from_array( 'more_shipping_info', $session_data, '' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -345,7 +345,7 @@ function sd_checkout_fields($groups)
 		'label' => "Xuất hóa đơn công ty",
 		'type' => "checkbox",
 		'class' => 'form-row-wide',
-		'default' => '',
+		'default' => sd_get_value_from_array( 'vat_check', $session_data, '' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -354,7 +354,7 @@ function sd_checkout_fields($groups)
 		'placeholder' => "Tên công ty",
 		'type' => "text",
 		'class' => 'vat_field form-row-wide',
-		'default' => '',
+		'default' => sd_get_value_from_array( 'vat_cty', $session_data, '' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -363,7 +363,7 @@ function sd_checkout_fields($groups)
 		'placeholder' => "Địa chỉ công ty",
 		'type' => "text",
 		'class' => 'vat_field form-row-wide',
-		'default' => '',
+		'default' => sd_get_value_from_array( 'vat_address', $session_data, '' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -372,7 +372,7 @@ function sd_checkout_fields($groups)
 		'placeholder' => "Mã số thuế",
 		'type' => "text",
 		'class' => 'vat_field form-row-wide',
-		'default' => '',
+		'default' => sd_get_value_from_array( 'vat_tax_num', $session_data, '' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -534,12 +534,16 @@ foreach ($hooks as $event => $hooks) {
 /**
  * Undocumented function
  *
- * @param WP_REST_Response $data
+ * @param WP_REST_Response $response
+ * @param WC_Order $object
  * @return void
  */
 function sd_woocommerce_rest_prepare_shop_order_object($response, $object)
 {
 	$extra = sd_get_order_extra_data($object);
+	$more_data = $object->get_meta('_sd_more_info', true );
+	$more_data  = is_array( $more_data ) ? $more_data : [];
+	$extra = array_merge( $extra, $more_data );
 	$response->data['extra'] = $extra;
 	return $response;
 }
