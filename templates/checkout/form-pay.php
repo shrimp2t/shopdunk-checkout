@@ -18,6 +18,9 @@
 
 defined('ABSPATH') || exit;
 
+/**
+ * @see WC_Order
+ */
 $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 // $order_button_text = 'Thanh toán';
 $extra = sd_get_order_extra_data($order);

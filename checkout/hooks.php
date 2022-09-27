@@ -104,6 +104,21 @@ function sd_custom_order_status($order_statuses)
 	return $order_statuses;
 }
 
+function sd_woocommerce_register_shop_order_post_statuses( $status ) {
+	$status['wc-partial-payment'] = array(
+		'label'                     => _x( 'Partial payment', 'Order status', 'woocommerce' ),
+		'public'                    => false,
+		'exclude_from_search'       => false,
+		'show_in_admin_all_list'    => true,
+		'show_in_admin_status_list' => true,
+		/* translators: %s: number of orders */
+		'label_count'               => _n_noop( 'Partial payment <span class="count">(%s)</span>', 'Partial payment <span class="count">(%s)</span>', 'woocommerce' ),
+	);
+	return $status;
+}
+
+add_filter('woocommerce_register_shop_order_post_statuses', 'sd_woocommerce_register_shop_order_post_statuses');
+
 
 $hooks = [
 	'order.created'    => array(
@@ -319,6 +334,70 @@ function sd_add_checkout_data($data)
 
 // add_filter('woocommerce_checkout_posted_data', 'sd_add_checkout_data',  9999);
 
+function sd_change_order_total($number)
+{
+	if (WC()->session->get('_sd_pay_method') === 'part') {
+		$number = WC()->session->get('_sd_pay_amount');
+	}
+	return $number;
+}
+
+function sd_woocommerce_payment_complete_order_status($status)
+{
+	if (WC()->session->get('_sd_pay_method') === 'part') {
+		$status = 'wc-partial-payment';
+	}
+
+	// var_dump( $status ); die();
+	return $status;
+}
+
+function sd_woocommerce_valid_order_statuses_for_payment_complete( $statuses ) {
+	// $statuses [] = 'partial-payment';
+	return $$statuses ;
+}
+// add_filter('woocommerce_valid_order_statuses_for_payment_complete', 'sd_woocommerce_valid_order_statuses_for_payment_complete');
+
+/**
+ * Undocumented function
+ *
+ * @param WC_Order $order
+ * @return void
+ */
+function sd_woocommerce_before_pay_action($order)
+{
+	if (isset($_POST['pay_amount']) && $_POST['pay_amount'] == 'part') {
+		$pay_amount = 1000000;
+		WC()->session->set('_sd_all_total', $order->get_total());
+		WC()->session->set('_sd_pay_amount', $pay_amount);
+		WC()->session->set('_sd_pay_method', 'part');
+		$order->add_meta_data('_sd_all_total', $order->get_total(), true);
+		$order->add_meta_data('_sd_pay_amount', $pay_amount, true);
+	} else {
+		WC()->session->set('_sd_pay_method', 'full');
+		$order->delete_meta_data('_sd_all_total');
+		$order->delete_meta_data('_sd_pay_amount');
+	}
+
+	add_filter('woocommerce_order_get_total', 'sd_change_order_total');
+	add_filter('woocommerce_payment_complete_order_status', 'sd_woocommerce_payment_complete_order_status',  999);
+	
+
+}
+function sd_woocommerce_after_pay_action($order)
+{
+	unset(WC()->session['_sd_all_total']);
+	unset(WC()->session['_sd_pay_amount']);
+	unset(WC()->session['_sd_pay_method']);
+
+	remove_action('woocommerce_order_get_total', 'sd_change_order_total');
+	remove_action('woocommerce_payment_complete_order_status', 'sd_woocommerce_payment_complete_order_status');
+
+}
+add_action('woocommerce_before_pay_action', 'sd_woocommerce_before_pay_action', 99);
+add_action('woocommerce_after_pay_action', 'sd_woocommerce_after_pay_action', 99);
+
+
 
 
 
@@ -456,10 +535,11 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	// $body = json_decode(wp_remote_retrieve_body($r), true);
 
 	$body['id'] = rand(1111111, 9999999);
-	$body['payment_message'] = 'M668' .$store_id. $body['id'];
+	$body['payment_message'] = 'M668' . $store_id . $body['id'];
 
 	$order->add_meta_data('_odoo_order__test', 'OK', true);
 	if (isset($_GET['debug'])) {
+		var_dump($order->get_status( 'edit' ));
 		var_dump($payload);
 		var_dump($body);
 		var_dump($odoo_data);

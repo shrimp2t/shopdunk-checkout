@@ -133,12 +133,12 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 		$order = new WC_Order($order_id);
 
 		// Mark as on-hold (we're awaiting the cheque)
-		$order->update_status($this->order_status, __('Awaiting payment', 'woocommerce-other-payment-gateway'));
+		// $order->update_status($this->order_status, __('Awaiting payment', 'woocommerce-other-payment-gateway'));
 		// Reduce stock levels
 		wc_reduce_stock_levels($order_id);
 
 		// we received the payment
-		// $order->payment_complete();
+		$order->payment_complete();
 
 		// some notes to customer (replace true with false to make it private)
 		// $order->add_order_note('Hey, your order is paid! Thank you!', true);
