@@ -125,10 +125,11 @@ jQuery(function ($) {
 	const $morebtn = $('<a class="other-payment-gateways" href="#">Xem thêm các phương thức thanh toán khác</a>');
 	$('.wc_payment_methods li:first-child').append($morebtn)
 	$('.wc_payment_methods li').not(':first-child').addClass('hide');
-	$morebtn.on('click', function (e) {
+	$(document).on('click', '.other-payment-gateways', function (e) {
 		e.preventDefault();
+		console.log('clcicked');
 		$('.wc_payment_methods li').not(':first-child').removeClass('hide');
-		$morebtn.hide();
+		$( '.other-payment-gateways' ).hide();
 	})
 
 

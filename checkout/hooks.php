@@ -3,9 +3,11 @@
 
 add_action('wp_enqueue_scripts', function () {
 	if (is_checkout()) {
+		$css_ver = @filemtime(SD_CO_PATH . '/assets/css/checkout.css');
+		$js_ver = @filemtime(SD_CO_PATH . '/assets/js/checkout.js');
 		wp_enqueue_script('wc-cart');
-		wp_enqueue_style('sd-checkout', SD_CO_URL . '/assets/css/checkout.css');
-		wp_enqueue_script('sd-checkout', SD_CO_URL . '/assets/js/checkout.js', ['jquery'], false, true);
+		wp_enqueue_style('sd-checkout', SD_CO_URL . '/assets/css/checkout.css', [], $css_ver);
+		wp_enqueue_script('sd-checkout', SD_CO_URL . '/assets/js/checkout.js', ['jquery'], $js_ver, true);
 
 		$stores = sd_get_data_stores();
 		wp_localize_script('sd-checkout', 'SD_Checkout', [
@@ -278,7 +280,6 @@ add_filter('woocommerce_cart_needs_shipping', '__return_true');
 
 function sd_add_checkout_data($data)
 {
-
 
 	$shipping_method = isset($_POST['shipping_sd_method']) ? wc_clean($_POST['shipping_sd_method']) : 'store';
 	$title = isset($_POST['billing_title']) ? wc_clean($_POST['billing_title']) : 'mr';
@@ -556,7 +557,9 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 		var_dump($order->get_status('edit'));
 		var_dump($payload);
 		var_dump($body);
-		var_dump($odoo_data);
+		echo "<pre>";
+		echo json_encode($odoo_data);
+		echo "</pre>";
 	}
 
 	if (isset($body['id'])) {
