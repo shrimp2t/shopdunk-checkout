@@ -133,30 +133,6 @@ function sd_woocommerce_register_shop_order_post_statuses($status)
 add_filter('woocommerce_register_shop_order_post_statuses', 'sd_woocommerce_register_shop_order_post_statuses');
 
 
-$hooks = [
-	'order.created'    => array(
-		'woocommerce_new_order',
-	),
-	'order.updated'    => array(
-		'woocommerce_update_order',
-		'woocommerce_order_refunded',
-	),
-	'order.deleted'    => array(
-		'wp_trash_post',
-	),
-	'order.restored'   => array(
-		'untrashed_post',
-	),
-];
-
-foreach ($hooks as $event => $hooks) {
-	foreach ($hooks as $hook) {
-		add_action($hook, 'sd_send_order_to_odoo_webhook', 10, 2);
-	}
-}
-
-
-
 
 /**
  * @see woocommerce_form_field()
@@ -290,10 +266,6 @@ function sd_checkout_fields($groups)
 	];
 
 
-
-
-
-
 	return $groups;
 }
 
@@ -414,6 +386,28 @@ add_action('woocommerce_after_pay_action', 'sd_woocommerce_after_pay_action', 99
 
 
 
+$hooks = [
+	'order.created'    => array(
+		'woocommerce_new_order',
+	),
+	'order.updated'    => array(
+		'woocommerce_update_order',
+		'woocommerce_order_refunded',
+	),
+	'order.deleted'    => array(
+		'wp_trash_post',
+	),
+	'order.restored'   => array(
+		'untrashed_post',
+	),
+];
+
+foreach ($hooks as $event => $hooks) {
+	foreach ($hooks as $hook) {
+		add_action($hook, 'sd_send_order_to_odoo_webhook', 10, 2);
+	}
+}
+
 
 
 /**
@@ -427,7 +421,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 {
 
 	// $url = 'https://eotw38jsq4ccm0l.m.pipedream.net';
-	$url = SD_API_ORDERS;
+	$url = get_option('sd_odoo_api_url');
 	$version = str_replace('wp_api_', '', 'wp_api_v3');
 	$payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $order_id);
 
@@ -458,7 +452,6 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 	// $address = [$payload['billing']['address_1']];
 	// $address[] = $payload['billing']['city'];
 	// $address[] = $payload['billing']['state'];
-
 
 	$store_id = $order->get_meta('_shipping_store_id', true);
 	$store_area = $order->get_meta('_shipping_store_area', true);
@@ -545,15 +538,10 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 		'data_format' => 'body',
 	]);
 
-
-	echo json_encode( $odoo_data );
-
-
 	// $bank_accounts = get_csv_array();
+	$code = wp_remote_retrieve_response_code($r);
 	$body = json_decode(wp_remote_retrieve_body($r), true);
-	var_dump(  wp_remote_retrieve_response_code($r));
-	var_dump(  $body);
-
+	
 	$body['id'] = rand(1111111, 9999999);
 	$body['payment_message'] = 'M668' . $store_id . $body['id'];
 

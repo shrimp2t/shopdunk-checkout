@@ -33,41 +33,21 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 				'label' 		=> __('Enable Custom Payment', 'woocommerce-other-payment-gateway'),
 				'default' 		=> 'yes'
 			),
-
 			'title' => array(
 				'title' 		=> __('Method Title', 'woocommerce-other-payment-gateway'),
 				'type' 			=> 'text',
 				'description' 	=> __('This controls the title', 'woocommerce-other-payment-gateway'),
-				'default'		=> __('Chuyển khoảng ngân hàng', 'woocommerce-other-payment-gateway'),
+				'default'		=> __('Chuyển khoản ngân hàng', 'woocommerce-other-payment-gateway'),
 				'desc_tip'		=> true,
 			),
 			'description' => array(
 				'title' => __('Customer Message', 'woocommerce-other-payment-gateway'),
 				'type' => 'textarea',
 				'css' => 'width:500px;',
-				'default' => 'None of the other payment options are suitable for you? please drop us a note about your favourable payment option and we will contact you as soon as possible.',
+				'default' => '',
 				'description' 	=> __('The message which you want it to appear to the customer in the checkout page.', 'woocommerce-other-payment-gateway'),
 			),
-			'text_box_required' => array(
-				'title' 		=> __('Make the text field required', 'woocommerce-other-payment-gateway'),
-				'type' 			=> 'checkbox',
-				'label' 		=> __('Make the text field required', 'woocommerce-other-payment-gateway'),
-				'default' 		=> 'no'
-			),
-			'hide_text_box' => array(
-				'title' 		=> __('Hide The Payment Field', 'woocommerce-other-payment-gateway'),
-				'type' 			=> 'checkbox',
-				'label' 		=> __('Hide', 'woocommerce-other-payment-gateway'),
-				'default' 		=> 'no',
-				'description' 	=> __('If you do not need to show the text box for customers at all, enable this option.', 'woocommerce-other-payment-gateway'),
-			),
-			'order_status' => array(
-				'title' => __('Order Status After The Checkout', 'woocommerce-other-payment-gateway'),
-				'type' => 'select',
-				'options' => wc_get_order_statuses(),
-				'default' => 'wc-on-hold',
-				'description' 	=> __('The default order status if this gateway used in payment.', 'woocommerce-other-payment-gateway'),
-			),
+			
 		);
 	}
 	/**

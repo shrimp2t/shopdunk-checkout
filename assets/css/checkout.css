@@ -43,3 +43,26 @@
 #shipping_sd_method_field .r-wrapper label {
 	margin-bottom: 0px;
 }
+
+.checkout-box.payment-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border: none;
+}
+
+.checkout-box {
+	background: #fff;
+	border-radius: 16px;
+	padding: 1.5em;
+	margin: 1em 0;
+	border: 1px solid #ccc;
+}
+
+#add_payment_method #payment, .woocommerce-cart #payment, .woocommerce-checkout #payment {
+	background: none;
+}
+.payment_box fieldset {
+	border: none;
+	padding: 0px;
+}
