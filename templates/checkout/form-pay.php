@@ -56,21 +56,19 @@ $GLOBALS['sd_payment_order_extra'] = $extra;
 
 		<div>
 			<label class="amount-box">
-				<input type="radio" name="pay_amount" value="part">
+				<input type="radio" checked name="pay_amount" value="part">
 				<span>Thanh toán trước</span>
 				<span class="amount"><?php echo wc_price(1000000); ?></span>
 			</label>
 			<label class="amount-box">
-				<input type="radio" name="pay_amount" value="all">
+				<input type="radio"  name="pay_amount" value="all">
 				<span>Toàn bộ đơn hàng</span>
 				<span class="amount"><?php echo wc_price($order->get_total()); ?></span>
 			</label>
 		</div>
-
-
 	</div>
 
-
+	
 
 	<div class="payment-box">
 		<h2>Phương thức thanh toán</h2>

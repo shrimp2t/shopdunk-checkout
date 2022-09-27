@@ -92,6 +92,7 @@ function sd_custom_status_valid_for_payment($statuses, $order)
 
 	// Registering the custom status as valid for payment
 	$statuses[] = 'partial-payment';
+	$statuses[] = 'partial-pending';
 
 	return $statuses;
 }
@@ -101,18 +102,30 @@ add_filter('wc_order_statuses', 'sd_custom_order_status');
 function sd_custom_order_status($order_statuses)
 {
 	$order_statuses['wc-partial-payment'] = _x('Partial payment', 'Order status', 'woocommerce');
+	$order_statuses['wc-partial-processing'] = _x('Processing partial payment', 'Order status', 'woocommerce');
 	return $order_statuses;
 }
 
-function sd_woocommerce_register_shop_order_post_statuses( $status ) {
+function sd_woocommerce_register_shop_order_post_statuses($status)
+{
 	$status['wc-partial-payment'] = array(
-		'label'                     => _x( 'Partial payment', 'Order status', 'woocommerce' ),
+		'label'                     => _x('Partial payment', 'Order status', 'woocommerce'),
 		'public'                    => false,
 		'exclude_from_search'       => false,
 		'show_in_admin_all_list'    => true,
 		'show_in_admin_status_list' => true,
 		/* translators: %s: number of orders */
-		'label_count'               => _n_noop( 'Partial payment <span class="count">(%s)</span>', 'Partial payment <span class="count">(%s)</span>', 'woocommerce' ),
+		'label_count'               => _n_noop('Partial payment <span class="count">(%s)</span>', 'Partial payment <span class="count">(%s)</span>', 'woocommerce'),
+	);
+
+	$status['wc-partial-processing'] = array(
+		'label'                     => _x('Processing partial payment', 'Order status', 'woocommerce'),
+		'public'                    => false,
+		'exclude_from_search'       => false,
+		'show_in_admin_all_list'    => true,
+		'show_in_admin_status_list' => true,
+		/* translators: %s: number of orders */
+		'label_count'               => _n_noop('Processing partial payment <span class="count">(%s)</span>', 'Processing partial payment <span class="count">(%s)</span>', 'woocommerce'),
 	);
 	return $status;
 }
@@ -345,16 +358,18 @@ function sd_change_order_total($number)
 function sd_woocommerce_payment_complete_order_status($status)
 {
 	if (WC()->session->get('_sd_pay_method') === 'part') {
-		$status = 'wc-partial-payment';
+		// $status = 'wc-partial-payment';
+		$status = 'wc-partial-processing';
 	}
 
 	// var_dump( $status ); die();
 	return $status;
 }
 
-function sd_woocommerce_valid_order_statuses_for_payment_complete( $statuses ) {
+function sd_woocommerce_valid_order_statuses_for_payment_complete($statuses)
+{
 	// $statuses [] = 'partial-payment';
-	return $$statuses ;
+	return $$statuses;
 }
 // add_filter('woocommerce_valid_order_statuses_for_payment_complete', 'sd_woocommerce_valid_order_statuses_for_payment_complete');
 
@@ -373,7 +388,7 @@ function sd_woocommerce_before_pay_action($order)
 		WC()->session->set('_sd_pay_method', 'part');
 		$order->add_meta_data('_sd_all_total', $order->get_total(), true);
 		$order->add_meta_data('_sd_pay_amount', $pay_amount, true);
-		$order->add_order_note(sprintf('Khách hàng đặt cọc trước: %s.', wc_price( $pay_amount ) ));
+		$order->add_order_note(sprintf('Khách hàng đặt cọc trước: %s.', wc_price($pay_amount)));
 	} else {
 		WC()->session->set('_sd_pay_method', 'full');
 		$order->delete_meta_data('_sd_all_total');
@@ -382,7 +397,6 @@ function sd_woocommerce_before_pay_action($order)
 
 	add_filter('woocommerce_order_get_total', 'sd_change_order_total');
 	add_filter('woocommerce_payment_complete_order_status', 'sd_woocommerce_payment_complete_order_status',  999);
-	
 }
 function sd_woocommerce_after_pay_action($order)
 {
@@ -392,7 +406,6 @@ function sd_woocommerce_after_pay_action($order)
 
 	remove_action('woocommerce_order_get_total', 'sd_change_order_total');
 	remove_action('woocommerce_payment_complete_order_status', 'sd_woocommerce_payment_complete_order_status');
-
 }
 add_action('woocommerce_before_pay_action', 'sd_woocommerce_before_pay_action', 99);
 add_action('woocommerce_after_pay_action', 'sd_woocommerce_after_pay_action', 99);
@@ -539,7 +552,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 
 	$order->add_meta_data('_odoo_order__test', 'OK', true);
 	if (isset($_GET['debug'])) {
-		var_dump($order->get_status( 'edit' ));
+		var_dump($order->get_status('edit'));
 		var_dump($payload);
 		var_dump($body);
 		var_dump($odoo_data);
