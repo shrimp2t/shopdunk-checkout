@@ -373,6 +373,7 @@ function sd_woocommerce_before_pay_action($order)
 		WC()->session->set('_sd_pay_method', 'part');
 		$order->add_meta_data('_sd_all_total', $order->get_total(), true);
 		$order->add_meta_data('_sd_pay_amount', $pay_amount, true);
+		$order->add_order_note(sprintf('Khách hàng đặt cọc trước: %s.', wc_price( $pay_amount ) ));
 	} else {
 		WC()->session->set('_sd_pay_method', 'full');
 		$order->delete_meta_data('_sd_all_total');
@@ -382,7 +383,6 @@ function sd_woocommerce_before_pay_action($order)
 	add_filter('woocommerce_order_get_total', 'sd_change_order_total');
 	add_filter('woocommerce_payment_complete_order_status', 'sd_woocommerce_payment_complete_order_status',  999);
 	
-
 }
 function sd_woocommerce_after_pay_action($order)
 {
