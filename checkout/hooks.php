@@ -91,8 +91,8 @@ function sd_custom_status_valid_for_payment($statuses, $order)
 {
 
 	// Registering the custom status as valid for payment
-	$statuses[] = 'partial-payment';
-	$statuses[] = 'partial-pending';
+	// $statuses[] = 'partial-payment';
+	// $statuses[] = 'partial-processing';
 
 	return $statuses;
 }
@@ -381,13 +381,15 @@ function sd_woocommerce_valid_order_statuses_for_payment_complete($statuses)
  */
 function sd_woocommerce_before_pay_action($order)
 {
-	if (isset($_POST['pay_amount']) && $_POST['pay_amount'] == 'part') {
-		$pay_amount = 1000000;
+
+	$pay_amount = floatval(get_option('sd_partial_order_amount'));
+	if ($pay_amount > 0 && isset($_POST['pay_amount']) && $_POST['pay_amount'] == 'part') {
 		WC()->session->set('_sd_all_total', $order->get_total());
 		WC()->session->set('_sd_pay_amount', $pay_amount);
 		WC()->session->set('_sd_pay_method', 'part');
 		$order->add_meta_data('_sd_all_total', $order->get_total(), true);
 		$order->add_meta_data('_sd_pay_amount', $pay_amount, true);
+		$order->add_meta_data('_sd_pay_method', 'part', true);
 		$order->add_order_note(sprintf('Khách hàng đặt cọc trước: %s.', wc_price($pay_amount)));
 	} else {
 		WC()->session->set('_sd_pay_method', 'full');
@@ -536,22 +538,28 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null)
 		'note_items' => [],
 	];
 
-	// $r = wp_remote_post($url, [
-	// 	'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
-	// 	'body'        => json_encode($odoo_data),
-	// 	'method'      => 'POST',
-	// 	'data_format' => 'body',
-	// ]);
+	$r = wp_remote_post($url, [
+		'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
+		'body'        => json_encode($odoo_data),
+		'method'      => 'POST',
+		'data_format' => 'body',
+	]);
+
+
+	echo json_encode( $odoo_data );
 
 
 	// $bank_accounts = get_csv_array();
-	// $body = json_decode(wp_remote_retrieve_body($r), true);
+	$body = json_decode(wp_remote_retrieve_body($r), true);
+	var_dump(  wp_remote_retrieve_response_code($r));
+	var_dump(  $body);
 
 	$body['id'] = rand(1111111, 9999999);
 	$body['payment_message'] = 'M668' . $store_id . $body['id'];
 
 	$order->add_meta_data('_odoo_order__test', 'OK', true);
 	if (isset($_GET['debug'])) {
+		var_dump(get_option('sd_partial_order_amount'));
 		var_dump($order->get_status('edit'));
 		var_dump($payload);
 		var_dump($body);

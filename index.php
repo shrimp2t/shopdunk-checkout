@@ -23,6 +23,7 @@ add_action('plugins_loaded', function () {
 	require dirname(__FILE__) . '/checkout/hooks.php';
 	require dirname(__FILE__) . '/gateways/contact.php';
 	require dirname(__FILE__) . '/gateways/gateway.php';
+	require dirname(__FILE__) . '/admin/admin-settings.php';
 });
 
 

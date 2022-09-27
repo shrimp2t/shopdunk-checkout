@@ -241,8 +241,6 @@ function sd_get_order_extra_data($order)
 		$address = $order->get_shipping_address_1();
 	}
 
-	
-
 
 	$extra =  [
 		'id' => $order->get_id(),
@@ -252,6 +250,9 @@ function sd_get_order_extra_data($order)
 		'store_name' => isset($stores[$store_id]) ? $stores[$store_id]['address'] : '',
 		'store_data' => isset($stores[$store_id]) ? $stores[$store_id] : false,
 		'billing_title' => $billing_title ? $billing_title : 'Anh',
+		'pay_amount' => $order->get_meta('_sd_pay_amount', true),
+		'pay_method' => $order->get_meta('_sd_pay_method', true),
+		'pay_method' => $order->get_meta('_sd_pay_method', true),
 		'store_area' => $store_area,
 		'full_shipping_address' => '',
 		'shipping_method' => $shipping_method,
@@ -263,7 +264,31 @@ function sd_get_order_extra_data($order)
 		'px_name' => isset($phuong_xa[$shipping_phuong_xa]) ? $phuong_xa[$shipping_phuong_xa]['name'] : '',
 	];
 
-	$extra['full_shipping_address'] = join(', ', [$address, $extra['px_name'], $extra['qh_name'], $extra['province_name'] ]);
+	$extra['full_shipping_address'] = join(', ', [$address, $extra['px_name'], $extra['qh_name'], $extra['province_name']]);
 
 	return $extra;
+}
+
+
+function sd_allow_partial_pay($order)
+{
+	$items = $order->get_items('line_item');
+	$allowed_skus = explode("\n", get_option('sd_partial_pay_allowed_skus'));
+	$allowed_skus = array_map('trim', $allowed_skus);
+	$allowed_skus = array_filter($allowed_skus);
+	if (empty($allowed_skus)) {
+		return false;
+	}
+	/**
+	 * @see WC_Order_Item_Product
+	 */
+	foreach ($items as $item) {
+		$item_p = $item->get_product();
+		$sku = $item_p->get_sku();
+		if (in_array($sku, $allowed_skus)) {
+			return true;
+		}
+	}
+
+	return false;
 }

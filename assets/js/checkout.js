@@ -2,6 +2,22 @@
 
 jQuery(function ($) {
 
+
+
+	// Auto change cart qty.
+	let updateCartTimeout = false;
+	$(document.body).on('change', 'form.woocommerce-cart-form input.qty', function () {
+		const $cart = $('form.woocommerce-cart-form');
+		if (updateCartTimeout) {
+			clearTimeout(updateCartTimeout);
+		}
+		updateCartTimeout = setTimeout(function () {
+			$cart.find('button[name="update_cart"]').click();
+			updateCartTimeout = false;
+		}, 1000);
+
+	});
+
 	$('#shipping_sd_method_field input[name="shipping_sd_method"]').on('change', function () {
 		const m = $('#shipping_sd_method_field input[name="shipping_sd_method"]:checked').val();
 

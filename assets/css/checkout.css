@@ -1,0 +1,45 @@
+.thankyou-box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.sd-thankyou-wrap .order-box {
+	display: flex;
+	width: 100%;
+	border-bottom: 1px dashed #ccc;
+}
+
+.sd-thankyou-wrap .order-box>* {
+	padding: 1.5em;
+}
+
+.sd-thankyou-wrap .order-box>.order-box-v {
+	margin-left: auto;
+}
+
+.sd-table__product-name.product-name>* {
+	display: block;
+}
+
+.woocommerce-shipping-totals.shipping {
+	display: none;
+}
+
+#shipping_sd_method_field .woocommerce-input-wrapper,
+#billing_title_field .woocommerce-input-wrapper
+{
+	display: flex;
+	gap: 2em;
+	align-items: center;
+}
+#billing_title_field .r-wrapper,
+#shipping_sd_method_field .r-wrapper
+{
+	display: flex;
+	align-items: center;
+}
+#billing_title_field .r-wrapper label,
+#shipping_sd_method_field .r-wrapper label {
+	margin-bottom: 0px;
+}

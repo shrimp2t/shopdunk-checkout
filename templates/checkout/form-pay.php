@@ -28,13 +28,13 @@ $GLOBALS['sd_payment_order_extra'] = $extra;
 ?>
 <form id="order_review" method="post">
 
-	<div class="payment--header">
+	<div class="checkout-box  payment-header">
 		<div class="payment-icon-success"></div>
 		<h2>Đặt hàng thành công.</h2>
 		<p><?php echo esc_html(sprintf('Cám ơn %s %s đã cho ShopDunk cơ hội được phục vụ', $extra['billing_title'], $order->get_billing_first_name())) ?></p>
 	</div>
 
-	<div class="payment-billing">
+	<div class="checkout-box  payment-billing">
 		<p>ID đơng hàng: <strong><?php echo esc_html($extra['odoo_order_id']); ?></strong></p>
 		<?php if ($extra['shipping_method'] == 'ship') { ?>
 			<p>Giao hàng tận nơi: <strong><?php echo esc_html($extra['full_shipping_address']); ?></strong></p>
@@ -44,16 +44,21 @@ $GLOBALS['sd_payment_order_extra'] = $extra;
 		<p>Tổng tiền: <strong><?php echo wc_price($order->get_total()); ?></strong></p>
 	</div>
 
-
 	<?php if (in_array($order->get_status(), ['pending'])) { ?>
-		<div class="payment-order-status">Đơn hàng chưa được thanh toán.</div>
+		<div class="checkout-box  payment-order-status">Đơn hàng chưa được thanh toán.</div>
 	<?php } ?>
 
 
-	<div class="payment-order-amount">
+	<?php
+	$allow_pay = sd_allow_partial_pay($order);
+	?>
+
+	<?php if ( $allow_pay ) { ?>
+	<div class="checkout-box payment-order-amount">
 
 		<h2>Chọn số tiền muốn thanh toán</h2>
 
+	
 		<div>
 			<label class="amount-box">
 				<input type="radio" checked name="pay_amount" value="part">
@@ -61,16 +66,18 @@ $GLOBALS['sd_payment_order_extra'] = $extra;
 				<span class="amount"><?php echo wc_price(1000000); ?></span>
 			</label>
 			<label class="amount-box">
-				<input type="radio"  name="pay_amount" value="all">
+				<input type="radio" name="pay_amount" value="all">
 				<span>Toàn bộ đơn hàng</span>
 				<span class="amount"><?php echo wc_price($order->get_total()); ?></span>
 			</label>
 		</div>
 	</div>
 
-	
+	<?php } ?>
 
-	<div class="payment-box">
+
+
+	<div class="checkout-box  payment-box">
 		<h2>Phương thức thanh toán</h2>
 		<div id="payment">
 			<?php if ($order->needs_payment()) : ?>
@@ -91,10 +98,7 @@ $GLOBALS['sd_payment_order_extra'] = $extra;
 	</div>
 
 
-
-
-
-	<div class="form-row">
+	<div class="fcheckout-box  form-row">
 		<input type="hidden" name="woocommerce_pay" value="1" />
 
 		<?php wc_get_template('checkout/terms.php'); ?>
