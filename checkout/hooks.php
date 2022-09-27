@@ -148,6 +148,8 @@ function sd_checkout_fields($groups)
 	// 	var_dump($f);
 	// }
 
+	$session_data = WC()->session->get('sd_checkout_data', []);
+
 	$groups['billing']['billing_title'] = [
 		'label' => "Xưng danh",
 		'type' => "radio",
@@ -156,7 +158,7 @@ function sd_checkout_fields($groups)
 			'Chị' => 'Chị',
 		],
 		'class' => 'form-row-wide',
-		'default' => 'Anh',
+		'default' => sd_get_value_from_array( 'billing_title', $session_data, 'Anh' ),
 		'value' => 'Anh',
 		'required' => true,
 		'priority' => 4,
@@ -203,7 +205,7 @@ function sd_checkout_fields($groups)
 			'store' => 'Nhận tại cửa hàng',
 			'ship' => 'Giao tận nơi',
 		],
-		'default' => 'store',
+		'default' =>  sd_get_value_from_array( 'shipping_sd_method', $session_data, 'store' ),
 		'required' => false,
 		'priority' => 5,
 	];
@@ -217,7 +219,7 @@ function sd_checkout_fields($groups)
 		'type' => "select",
 		'class' => 'form-row-wide',
 		'options' => $store_groups_options['options'],
-		'default' => 'Hà Nội',
+		'default' => sd_get_value_from_array( 'shipping_store_area', $session_data, 'Hà Nội' ),
 		'required' => false,
 		'priority' => 6,
 	];
@@ -227,7 +229,7 @@ function sd_checkout_fields($groups)
 		'type' => "select",
 		'class' => 'form-row-wide',
 		'options' => $store_groups_options['groups']['Hà Nội']['options'],
-		'default' => '001',
+		'default' => sd_get_value_from_array( 'shipping_store_id', $session_data, '001' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -239,7 +241,7 @@ function sd_checkout_fields($groups)
 		'type' => "select",
 		'class' => 'form-row-wide',
 		'options' => $provinces,
-		'default' => '01',
+		'default' => sd_get_value_from_array( 'shipping_province', $session_data, '01' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -274,7 +276,7 @@ function sd_checkout_fields($groups)
 		'description' => "Khi sản phẩm không còn hàng, tôi sẽ mua sản phẩm thay thế bên dưới.",
 		'type' => "checkbox",
 		'class' => 'form-row-wide',
-		'default' => '',
+		'default' => sd_get_value_from_array( 'secondary_check', $session_data, '' ),
 		'required' => false,
 		'priority' => 7,
 	];
@@ -394,13 +396,11 @@ add_filter('woocommerce_cart_needs_shipping_address', '__return_true', 9999);
 function sd_add_checkout_data($data)
 {
 
-	var_dump($data);
-	die();
-
+	WC()->session->set('sd_checkout_data', $data);
 	return  $data;
 }
 
-// add_filter('woocommerce_checkout_posted_data', 'sd_add_checkout_data',  9999);
+add_filter('woocommerce_checkout_posted_data', 'sd_add_checkout_data',  9999);
 
 
 // add_action( 'woocommerce_checkout_create_order', $order, $data );

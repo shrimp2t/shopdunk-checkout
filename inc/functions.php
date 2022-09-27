@@ -1,5 +1,15 @@
 <?php
 
+
+function sd_get_value_from_array($key, $data, $default = null)
+{
+	if (!is_array($data)) {
+		return $default;
+	}
+
+	return isset($data[$key]) ?  $data[$key] : $default;
+}
+
 function sd_get_data_stores()
 {
 
