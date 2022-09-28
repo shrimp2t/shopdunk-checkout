@@ -78,7 +78,7 @@ class WC_SD_Contact_Payment_Gateway extends WC_Payment_Gateway
 		// wc_reduce_stock_levels($order_id);
 
 		// Remove cart
-		// $woocommerce->cart->empty_cart();
+		$woocommerce->cart->empty_cart();
 		// Return thankyou redirect
 
 		WC()->session->set('sd_checkout_step', 'thank-toan');

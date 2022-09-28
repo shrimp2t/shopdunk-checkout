@@ -446,8 +446,27 @@ add_filter('woocommerce_cart_needs_shipping_address', '__return_true', 9999);
 
 function sd_add_checkout_data($data)
 {
+
+	if (isset($data['vat_check']) && $data['vat_check'] == 1) {
+		if (!isset($data['vat_cty']) || !$data['vat_cty']) {
+			wc_add_notice('Xuất hóa đơn đỏ thiếu tên công ty.', 'error');
+		}
+		if (!isset($data['vat_address']) || !$data['vat_address']) {
+			wc_add_notice('Xuất hóa đơn đỏ thiếu địa chỉ công ty.', 'error');
+		}
+		if (!isset($data['vat_tax_num']) || !$data['vat_tax_num']) {
+			wc_add_notice('Xuất hóa đơn đỏ thiếu mã số thuế.', 'error');
+		}
+	}
+
+
+	// wc_add_notice();
 	// var_dump($data);
 	// die();
+
+	// Validate field here
+
+
 	WC()->session->set('sd_checkout_data', $data);
 	return  $data;
 }
@@ -634,6 +653,8 @@ function sd_woocommerce_rest_prepare_shop_order_object($response, $object)
 add_filter('woocommerce_rest_prepare_shop_order_object', 'sd_woocommerce_rest_prepare_shop_order_object', 99, 3);
 
 
+
+
 /**
  * Undocumented function
  *
@@ -648,24 +669,28 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 		$order = wc_get_order($order);
 	}
 
-	$version = str_replace('wp_api_', '', 'wp_api_v3');
-	$payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $order->get_id());
+	// $version = str_replace('wp_api_', '', 'wp_api_v3');
+	// $payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $order->get_id());
+	$payload = $order->get_base_data();
+	$payload['extra'] = sd_get_order_extra_data($order);
+
 	$extra = $payload['extra'];
-	// var_dump( $extra );
 	$data_lines = [];
 	$item_notes = [];
 
 	$i = 1;
-	foreach ($payload['line_items'] as $item) {
-
+	foreach ($order->get_items('line_item') as $item) {
+		// var_dump($item);
+		$item_product = $item->get_product();
 		$line_item = [
-			'name' => "Sản phẩm {$i}: " . $item['name'],
-			'sku' => 'SKU: ' . $item['sku'],
+			'name' => "Sản phẩm {$i}: " . $item_product->get_name(),
+			'sku' => 'SKU: ' . $item_product->get_sku(),
 		];
 		$tt = [];
-		foreach ($item['meta_data'] as $mt) {
+		foreach ($item->get_formatted_meta_data() as  $mt) {
+			$mt = (array) $mt;
 			if (substr($mt['key'], 0, 1) != '_') {
-				$tt[] = $mt['display_key'] . ": " . $mt['display_value'];
+				$tt[] = wp_strip_all_tags($mt['display_key'], true) . ": " . wp_strip_all_tags($mt['display_value'], true);
 			}
 		}
 
@@ -678,18 +703,18 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 		$i++;
 
 		$data_lines[] = [
-			'sku' => $item['sku'],
-			'price' => $item['price'],
+			'sku' => $item_product->get_sku(),
+			'price' => $item_product->get_price(),
 			"product_id" => "",
 			"variant_id" => "",
-			"quantity" => $item['quantity'],
+			"quantity" => $item->get_quantity(),
 			"temp_price" => "",
 			"subtotal" => "",
 			"total_tax" => '',
 			"subtotal_tax" => '',
 			"discount_amount" => '',
 			"discount_percent" => '',
-			"total" => $item['total'],
+			"total" => $item->get_total(),
 			"shipping_total" => '',
 			"discount_total" => '',
 		];
@@ -755,17 +780,27 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 			"Cửa hàng: " . esc_html($extra['store__address']);
 	}
 
+	$red_invoice = [];
+
 	if ($extra['vat_check']) {
 		$notes['vat'] =  "<strong>Xuất hóa đơn đỏ</strong>:" .
 			"\nTên công ty: " . esc_html($extra['vat_cty']) .
 			"\nĐịa chỉ: " . esc_html($extra['vat_address']) .
 			"\nMã số thuế: " . esc_html($extra['vat_tax_num']);
+
+		$red_invoice = [
+			'name' => $extra['vat_cty'],
+			'address' => $extra['vat_address'],
+			'vat_num' => $extra['vat_tax_num'],
+		];
 	}
 
-	$shipping = $billing;
+	$shipping = $payload['shipping'];
+
 
 	if ($extra['more_shipping_info']) {
-		$shipping['name'] .= trim($payload['billing']['first_name'] . ' ' . $payload['billing']['last_name']);
+		$shipping['name'] = trim($payload['shipping']['first_name'] . ' ' . $payload['shipping']['last_name']);
+		$shipping['phone'] = $order->get_shipping_phone();
 	}
 
 	$shipping['method'] = $extra['shipping_method'];
@@ -785,7 +820,8 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 	$notes['web_id'] = 'Nguồn: ' . $web_id . " - " . home_url('/');
 
 	$odoo_data = [
-		'web_id' => $web_id,
+		// 'web_id' => $web_id,
+		'web_id' => '',
 		'created_via' => 'webshop',
 		'pos_id' => $store_id,
 		'seller_id' => '',
@@ -798,6 +834,10 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 		'line_items' => $data_lines,
 		'note_items' => [],
 	];
+
+	if (!empty($red_invoice)) {
+		$odoo_data['red_invoice'] = $red_invoice;
+	}
 
 	return $odoo_data;
 }
@@ -921,12 +961,21 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null, $retry_id =  '
 		'body' => $body,
 		'status_code' => $http_code,
 		'message' => $message,
+		'odoo_data' => $odoo_data,
 	];
 }
 
+if (isset($_GET['debug_all'])) {
+	add_action('wp', function () {
+		echo json_encode(get_get_payload_for_odoo($_GET['debug_all']), JSON_PRETTY_PRINT);
+		die();
+	});
+}
+
+
 if (isset($_GET['debug'])) {
 	add_action('wp', function () {
-		echo json_encode(get_get_payload_for_odoo($_GET['debug']));
+		echo json_encode(get_get_payload_for_odoo($_GET['debug']), JSON_PRETTY_PRINT);
 		die();
 	});
 }
@@ -934,6 +983,14 @@ if (isset($_GET['debug'])) {
 if (isset($_GET['debug_meta'])) {
 	add_action('wp', function () {
 		echo get_post_meta($_GET['debug_meta'], '_odoo_request_data', true);
+		die();
+	});
+}
+if (isset($_GET['debug_payload'])) {
+	add_action('wp', function () {
+		$version = str_replace('wp_api_', '', 'wp_api_v3');
+		$payload = wc()->api->get_endpoint_data("/wc/{$version}/orders/" . $_GET['debug_payload']);
+		echo json_encode($payload, JSON_PRETTY_PRINT);
 		die();
 	});
 }
