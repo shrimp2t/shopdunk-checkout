@@ -459,10 +459,26 @@ function sd_add_checkout_data($data)
 		}
 	}
 
+	if (isset($data['sd_shipping_method']) &&  $data['sd_shipping_method']) {
+ 
+		if (!isset($data['sd_shipping_province_id']) || !$data['sd_shipping_province_id']) {
+			wc_add_notice('Chọn tỉnh/thành phố.', 'error');
+		}
+		if (!isset($data['sd_shipping_qh_id']) || !$data['sd_shipping_qh_id']) {
+			wc_add_notice('Chọn quận/huyện.', 'error');
+		}
+		if (!isset($data['sd_shipping_px_id']) || !$data['sd_shipping_qh_id']) {
+			wc_add_notice('Chọn xã/phường.', 'error');
+		}
+		if (!isset($data['shipping_address_1']) || !$data['shipping_address_1']) {
+			wc_add_notice('Thiếu địa chỉ nhận hàng.', 'error');
+		}
+	}
+
 
 	// wc_add_notice();
-	// var_dump($data);
-	// die();
+	var_dump($data);
+	die();
 
 	// Validate field here
 
