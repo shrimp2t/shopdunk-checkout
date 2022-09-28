@@ -50,7 +50,7 @@ $totals = $order->get_order_item_totals();
 
 				<h2>Mua hàng thành công!</h2>
 				<p><?php
-					echo esc_html(sprintf('Cám ơn %s %s đã tin tưởng và tạo cơ hội để chúng tôi được phục vụ.', $extra['billing_title'], $order->get_billing_first_name())) ?></p>
+					echo esc_html(sprintf('Cám ơn %s %s đã tin tưởng và tạo cơ hội để chúng tôi được phục vụ.', $extra['sd_billing_title'], $order->get_billing_first_name())) ?></p>
 				</p>
 			<?php endif; ?>
 

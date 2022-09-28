@@ -233,13 +233,16 @@ function sd_get_order_extra_data($order)
 	$quan_huyen = sd_get_data_quan_huyen();
 	$phuong_xa = sd_get_data_phuong_xa();
 
-	$store_id = $order->get_meta('_shipping_store_id', true);
-	$store_area = $order->get_meta('_shipping_store_area', true);
-	$shipping_method = $order->get_meta('_shipping_sd_method', true);
-	$billing_title = $order->get_meta('_billing_title', true);
-	$shipping_province = $order->get_meta('_shipping_province', true);
-	$shipping_quan_huyen = $order->get_meta('_shipping_quan_huyen', true);
-	$shipping_phuong_xa = $order->get_meta('_shipping_phuong_xa', true);
+	$meta_extra = $order->get_meta('_sd_extra_info', true);
+	if (!is_array($meta_extra)) {
+		$meta_extra = [];
+	}
+
+	$store_id = sd_get_value_from_array('store_id', $meta_extra, '');
+	$shipping_province_id = sd_get_value_from_array('shipping_province_id', $meta_extra, '');
+	$shipping_qh_id = sd_get_value_from_array('shipping_qh_id', $meta_extra, '');
+	$shipping_px_id = sd_get_value_from_array('shipping_px_id', $meta_extra, '');
+
 	$odoo_order_id = $order->get_meta('_odoo_order_id', true);
 	$odoo_order_payment_message = $order->get_meta('_odoo_order_payment_message', true);
 
@@ -251,30 +254,66 @@ function sd_get_order_extra_data($order)
 		$address = $order->get_shipping_address_1();
 	}
 
-
 	$extra =  [
 		'id' => $order->get_id(),
 		'odoo_order_id' => $odoo_order_id,
 		'payment_message' => $odoo_order_payment_message,
 		'store_id' => $store_id,
-		'store_name' => isset($stores[$store_id]) ? $stores[$store_id]['address'] : '',
-		'store_data' => isset($stores[$store_id]) ? $stores[$store_id] : false,
-		'billing_title' => $billing_title ? $billing_title : 'Anh',
-		'total' => $order->get_total(),
-		'pay_amount' => $order->get_meta('_sd_pay_amount', true),
+		'total' => floatval($order->get_total()),
+		'pay_amount' => floatval($order->get_meta('_sd_pay_amount', true)),
 		'pay_method' => $order->get_meta('_sd_pay_method', true),
-		'store_area' => $store_area,
 		'full_shipping_address' => '',
-		'shipping_method' => $shipping_method,
-		'province_id' => $shipping_province,
-		'province_name' => isset($provinces[$shipping_province]) ? $provinces[$shipping_province]['name'] : '',
-		'qh_id' => $shipping_quan_huyen,
-		'qh_name' => isset($quan_huyen[$shipping_quan_huyen]) ? $quan_huyen[$shipping_quan_huyen]['name'] : '',
-		'px_id' => $shipping_phuong_xa,
-		'px_name' => isset($phuong_xa[$shipping_phuong_xa]) ? $phuong_xa[$shipping_phuong_xa]['name'] : '',
+		'shipping_province_name' => isset($provinces[$shipping_province_id]) ? $provinces[$shipping_province_id]['name'] : '',
+		'shipping_qh_name' => isset($quan_huyen[$shipping_qh_id]) ? $quan_huyen[$shipping_qh_id]['name'] : '',
+		'shipping_px_name' => isset($phuong_xa[$shipping_px_id]) ? $phuong_xa[$shipping_px_id]['name'] : '',
+		'shipping_address' => $order->get_shipping_address_1(),
 	];
 
-	$extra['full_shipping_address'] = join(', ', [$address, $extra['px_name'], $extra['qh_name'], $extra['province_name']]);
+	$extra['store_id'] = $store_id;
+	$store =  isset($stores[$store_id]) ? $stores[$store_id] : [];
+	$store = wp_parse_args($store, [
+		'code' => '',
+		'province' => '',
+		'address' => '',
+		'account' => '',
+	]);
+	foreach ($store as $k => $v) {
+		$extra['store__' . $k] = $v;
+	}
+
+	$extra['full_shipping_address'] = join(', ', array_filter([$address, $extra['shipping_px_name'], $extra['shipping_qh_name'], $extra['shipping_province_name']]));
+
+	$extra = array_merge($meta_extra, $extra);
+
+	$ship_keys = [
+		'full_shipping_address', 
+		'shipping_province_name', 
+		'shipping_qh_name', 
+		'shipping_px_name', 
+		'shipping_province_id', 
+		'shipping_qh_id', 
+		'shipping_px_id', 
+		'shipping_address', 
+	];
+
+	$store_keys = [
+		'store_id', 
+		'store_area', 
+		'store__code', 
+		'store__province', 
+		'store__address', 
+		'store__account', 
+	];
+
+	if ( $extra['shipping_method'] == 'ship' ) {
+		foreach( $store_keys as $k ) {
+			$extra[ $k ] = '';
+		}
+	} else {
+		foreach( $ship_keys as $k ) {
+			$extra[ $k ] = '';
+		}
+	}
 
 	return $extra;
 }

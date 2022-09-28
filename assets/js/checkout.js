@@ -44,29 +44,28 @@ jQuery(function ($) {
 			$( '.secondary_ps_field' ).hide();
 		}
 	} ) ;
-
 	$( '#secondary_check, #vat_check, #more_shipping_info' ).trigger( 'change' );
 
 
-	$('#shipping_sd_method_field input[name="shipping_sd_method"]').on('change', function () {
-		const m = $('#shipping_sd_method_field input[name="shipping_sd_method"]:checked').val();
+	$('#sd_shipping_method_field input[name="sd_shipping_method"]').on('change', function () {
+		const m = $('#sd_shipping_method_field input[name="sd_shipping_method"]:checked').val();
 		if (m === 'ship') {
-			$('#shipping_store_id_field, #shipping_store_area_field').hide();
-			$('#shipping_province_field, #shipping_quan_huyen_field, #shipping_phuong_xa_field, #shipping_address_1_field').show();
-			$('#shipping_province').trigger('change');
+			$('#sd_store_id_field, #sd_store_area_field').hide();
+			$('#sd_shipping_province_id_field, #sd_shipping_qh_id_field, #sd_shipping_px_id_field, #shipping_address_1_field').show();
+			$('#sd_shipping_province_id').trigger('change');
 		} else {
-			$('#shipping_province_field, #shipping_quan_huyen_field, #shipping_phuong_xa_field, #shipping_address_1_field').hide();
-			$('#shipping_store_id_field, #shipping_store_area_field').show();
-			$('#shipping_store_area').trigger('change');
+			$('#sd_shipping_province_id_field, #sd_shipping_qh_id_field, #sd_shipping_px_id_field, #shipping_address_1_field').hide();
+			$('#sd_store_id_field, #sd_store_area_field').show();
+			$('#sd_store_area').trigger('change');
 		}
 	});
 
-	$('#shipping_sd_method_field input[value="store"]').trigger('change');
+	$('#sd_shipping_method_field input[value="store"]').trigger('change');
 
 
 	// Change Store area
 
-	$('#shipping_store_area').on('change', function () {
+	$('#sd_store_area').on('change', function () {
 		const v = $(this).val();
 		const lv = $(this).data('lv');
 
@@ -83,14 +82,14 @@ jQuery(function ($) {
 			if (!aOptions.length) {
 				aOptions.push(defaultOpt);
 			}
-			$('#shipping_store_id').html(aOptions.join(' '));
+			$('#sd_store_id').html(aOptions.join(' '));
 		}
 
 	});
 
 
 
-	$('#shipping_province').on('change', function () {
+	$('#sd_shipping_province_id').on('change', function () {
 		const v = $(this).val();
 		const lv = $(this).data('lv');
 
@@ -108,18 +107,18 @@ jQuery(function ($) {
 				aOptions.push(defaultOpt);
 			}
 
-			$('#shipping_phuong_xa').data('lv', false);
-			$('#shipping_quan_huyen').data('lv', false);
+			$('#sd_shipping_px_id').data('lv', false);
+			$('#sd_shipping_qh_id').data('lv', false);
 
-			$('#shipping_quan_huyen').html(aOptions.join(' '));
-			$('#shipping_quan_huyen option:first-child').attr('selected', true);
-			$('#shipping_quan_huyen').trigger('change');
+			$('#sd_shipping_qh_id').html(aOptions.join(' '));
+			$('#sd_shipping_qh_id option:first-child').attr('selected', true);
+			$('#sd_shipping_qh_id').trigger('change');
 		}
 	});
 
-	$('#shipping_quan_huyen').on('change', function () {
+	$('#sd_shipping_qh_id').on('change', function () {
 		const v = $(this).val();
-		const pid = $('#shipping_province').val();
+		const pid = $('#sd_shipping_province_id').val();
 		const lv = $(this).data('lv');
 		const id = `${v}_${pid}`;
 
@@ -137,15 +136,15 @@ jQuery(function ($) {
 				aOptions.push(defaultOpt);
 			}
 
-			$('#shipping_phuong_xa').html(aOptions.join(' '));
+			$('#sd_shipping_px_id').html(aOptions.join(' '));
 		}
 	});
 
 
 
 
-	$('#shipping_store_area').trigger('change');
-	$('#shipping_province').trigger('change');
+	$('#sd_store_area').trigger('change');
+	$('#sd_shipping_province_id').trigger('change');
 
 
 	// Chọn phương thức thanh toán.

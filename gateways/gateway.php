@@ -155,10 +155,13 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 					$store = get_option('sd_default_store');
 					$account_number = get_option('sd_default_bank_account');
 					$bank_name = get_option('sd_default_bank_name');
-					if ($sd_payment_order_extra['store_data']) {
-						$account_number =  $sd_payment_order_extra['store_data']['account'];
+					if ($sd_payment_order_extra['store__account']) {
+						$account_number =  $sd_payment_order_extra['store__account'];
 						$bank_name = 'TECHCOMBANK - CN ĐÔNG ĐÔ, HÀ NỘI';
-					} else {
+					}
+
+					if ( $sd_payment_order_extra['pay_method'] !='ship' && $sd_payment_order_extra['store_id'] ) {
+						$store = $sd_payment_order_extra['store_id'];
 					}
 
 					$payment_message = $sd_payment_order_extra['payment_message'];

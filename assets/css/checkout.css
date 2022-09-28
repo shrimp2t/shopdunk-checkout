@@ -26,21 +26,21 @@
 	display: none;
 }
 
-#shipping_sd_method_field .woocommerce-input-wrapper,
-#billing_title_field .woocommerce-input-wrapper
+#sd_shipping_method_field .woocommerce-input-wrapper,
+#sd_billing_title_field .woocommerce-input-wrapper
 {
 	display: flex;
 	gap: 2em;
 	align-items: center;
 }
-#billing_title_field .r-wrapper,
-#shipping_sd_method_field .r-wrapper
+#sd_billing_title_field .r-wrapper,
+#sd_shipping_method_field .r-wrapper
 {
 	display: flex;
 	align-items: center;
 }
-#billing_title_field .r-wrapper label,
-#shipping_sd_method_field .r-wrapper label {
+#sd_billing_title_field .r-wrapper label,
+#sd_shipping_method_field .r-wrapper label {
 	margin-bottom: 0px;
 }
 
