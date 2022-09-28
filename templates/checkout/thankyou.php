@@ -141,7 +141,7 @@ $totals = $order->get_order_item_totals();
 					if ($extra['shipping_method'] == 'ship') {
 						echo esc_html($extra['full_shipping_address']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
 					} else {
-						echo esc_html($extra['store_name']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+						echo esc_html($extra['store__address']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
 					}
 					?>
 				</div>

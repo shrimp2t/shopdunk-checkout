@@ -45,6 +45,30 @@ function sd_get_data_stores()
 }
 
 
+function sd_load_dia_gioi_vn(){
+	$file = fopen(SD_CO_PATH . '/csv/vn-dia-gioi-all.csv', 'r');
+	$file = fopen(SD_CO_PATH . '/csv/tinh.csv', 'r');
+	$array = [];
+	$i = 0;
+	while (($line = fgetcsv($file)) !== FALSE) {
+		if ($i == 0) {
+			$i++;
+			continue;
+		}
+
+		$tinh = $line[0];
+		$tinh_code = $line[1];
+		$huyen = $line[2];
+		$huyen_code= $line[3];
+		$xa= $line[4];
+		$xa_code= $line[5];
+
+		$tinh = str_replace(['Tỉnh', 'tỉnh', 'Thành phố', 'Thành phố'], '', $tinh);
+
+
+	}
+} 
+
 function sd_get_data_provinces()
 {
 
