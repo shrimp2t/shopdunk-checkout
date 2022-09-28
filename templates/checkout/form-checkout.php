@@ -56,7 +56,6 @@ wc_get_template('cart/cart.php');
 			<?php
 				endif;
 			endif;
-
 			?>
 
 			<?php do_action('woocommerce_checkout_billing'); ?>

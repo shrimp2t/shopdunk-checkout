@@ -78,16 +78,19 @@ class WC_SD_Contact_Payment_Gateway extends WC_Payment_Gateway
 		// wc_reduce_stock_levels($order_id);
 
 		// Remove cart
-		$woocommerce->cart->empty_cart();
+		// $woocommerce->cart->empty_cart();
 		// Return thankyou redirect
 
 		WC()->session->set('sd_checkout_step', 'thank-toan');
-
+		// sd_send_order_to_odoo_webhook($order->get_id(), $order);
+		//  $order->get_checkout_payment_url(false)
 
 		return array(
 			'result' => 'success',
-			'redirect' =>  $order->get_checkout_payment_url(false),
-			// 'redirect' => home_url('/?ok=true')
+			//'id' => $order->id,
+			//'_odoo' => get_get_payload_for_odoo( $order ),
+			'redirect' => add_query_arg(['id'=> $order->get_id(), 'action'=> 'sd_checkout_handle_action'], admin_url('admin-ajax.php')),
+			// 'redirect' => $order->get_checkout_payment_url(false)
 		);
 	}
 }
