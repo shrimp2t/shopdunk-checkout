@@ -83,7 +83,7 @@ if (!$extra['odoo_order_id']) {
 			<div class="checkout-box  payment-order-status">Đơn hàng chưa được thanh toán.</div>
 		<?php } ?>
 		<?php
-
+		/*
 		$allow_pay = sd_allow_partial_pay($order);
 		$part_amount =  get_option('sd_partial_order_amount');
 		?>
@@ -103,9 +103,10 @@ if (!$extra['odoo_order_id']) {
 					</label>
 				</div>
 			</div>
-		<?php } ?>
-
-
+		<?php } 
+		*/
+		
+		?>
 		<div id="checkout-payment-gate-ways" class="checkout-box  payment-box">
 			<h2>Phương thức thanh toán</h2>
 			<div id="payment">
