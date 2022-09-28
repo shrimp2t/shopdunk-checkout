@@ -144,35 +144,35 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 	public function payment_fields()
 	{
 
-		global $sd_payment_order_extra;
+		global $sd_checkout_order_extra;
 	?>
 		<fieldset>
 			<p class="form-row form-row-wide">
 				<label for="<?php echo $this->id; ?>-admin-note"><?php echo ($this->description); ?> <?php if ($this->text_box_required === 'yes') : ?> <span class="required">*</span> <?php endif; ?></label>
 				<?php
-				if ($sd_payment_order_extra) {
+				if ($sd_checkout_order_extra) {
 
 					$store = get_option('sd_default_store');
 					$account_number = get_option('sd_default_bank_account');
 					$bank_name = get_option('sd_default_bank_name');
-					if ($sd_payment_order_extra['store__account']) {
-						$account_number =  $sd_payment_order_extra['store__account'];
+					if ($sd_checkout_order_extra['store__account']) {
+						$account_number =  $sd_checkout_order_extra['store__account'];
 						$bank_name = 'TECHCOMBANK - CN ĐÔNG ĐÔ, HÀ NỘI';
 					}
 
-					if ( $sd_payment_order_extra['pay_method'] !='ship' && $sd_payment_order_extra['store_id'] ) {
-						$store = $sd_payment_order_extra['store_id'];
+					if ( $sd_checkout_order_extra['pay_method'] !='ship' && $sd_checkout_order_extra['store_id'] ) {
+						$store = $sd_checkout_order_extra['store_id'];
 					}
 
-					$payment_message = $sd_payment_order_extra['payment_message'];
+					$payment_message = $sd_checkout_order_extra['payment_message'];
 					if (!$payment_message) {
 						$payment_message = 'M668' . $store . $bank_name;
 					}
 
-					if ('part' == $sd_payment_order_extra['pay_method']) {
-						$amount = $sd_payment_order_extra['pay_amount'];
+					if ('part' == $sd_checkout_order_extra['pay_method']) {
+						$amount = $sd_checkout_order_extra['pay_amount'];
 					} else {
-						$amount = $sd_payment_order_extra['total'];
+						$amount = $sd_checkout_order_extra['total'];
 					}
 
 				?>
@@ -189,7 +189,7 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 				Chủ tài khoản: CÔNG TY CỔ PHẦN HESMAN VIỆT NAM.
 			</p>
 			<p>
-				Nội dung chuyển khoản: <?php echo esc_html($sd_payment_order_extra['payment_message']); ?>
+				Nội dung chuyển khoản: <?php echo esc_html($sd_checkout_order_extra['payment_message']); ?>
 			</p>
 
 		<?php

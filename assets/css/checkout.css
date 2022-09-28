@@ -70,3 +70,15 @@
 .wc_payment_method.hide {
 	display: none;
 }
+
+.hide {
+	display: none !important;
+}
+
+.sd-retry-pay-msg {
+	color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+	padding: 1.5em;
+	margin: 1em 0;
+}

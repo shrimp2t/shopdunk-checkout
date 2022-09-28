@@ -33,7 +33,7 @@ $totals = $order->get_order_item_totals();
 	if ($order) :
 
 		$extra = sd_get_order_extra_data($order);
-		$GLOBALS['sd_payment_order_extra'] = $extra;
+		// $GLOBALS['sd_checkout_order_extra'] = $extra;
 		do_action('woocommerce_before_thankyou', $order->get_id());
 	?>
 
@@ -47,10 +47,9 @@ $totals = $order->get_order_item_totals();
 					<a href="<?php echo esc_url($order->get_checkout_payment_url()); ?>" class="button pay"><?php esc_html_e('Pay', 'woocommerce'); ?></a>
 				</p>
 			<?php else : ?>
-
 				<h2>Mua hàng thành công!</h2>
 				<p><?php
-					echo esc_html(sprintf('Cám ơn %s %s đã tin tưởng và tạo cơ hội để chúng tôi được phục vụ.', $extra['sd_billing_title'], $order->get_billing_first_name())) ?></p>
+					echo esc_html(sprintf('Cám ơn %s %s đã tin tưởng và tạo cơ hội để chúng tôi được phục vụ.', $extra['billing_title'], $order->get_billing_first_name())) ?></p>
 				</p>
 			<?php endif; ?>
 
@@ -94,11 +93,11 @@ $totals = $order->get_order_item_totals();
 				</div>
 			</div>
 
-			<?php if ($show_purchase_note && $purchase_note) : ?>
+			<?php if ($show_purchase_note && $product->get_purchase_note()) : ?>
 				<div class="order-box note">
 					<div class="order-box-l">Ghi chú</div>
 					<div class="order-box-v">
-						<?php echo wpautop(do_shortcode(wp_kses_post($purchase_note))); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+						<?php echo wpautop(do_shortcode(wp_kses_post($product->get_purchase_note()))); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
 						?>
 					</div>
 				</div>
@@ -148,16 +147,60 @@ $totals = $order->get_order_item_totals();
 				</div>
 			</div>
 
+
+			<?php if ($extra['secondary_check']) : ?>
+				<div class="order-box address">
+					<div class="order-box-l">Sản phẩm thay thế</div>
+					<div class="order-box-v">
+						<?php for ($i = 1; $i <= 2; $i++) :
+							if ( $extra['secondary_p'.$i.'_name']   ):
+							?>
+							<div class="secondary-product">
+								<div class="n">Sản phẩm <?php echo $i; ?>: <strong><?php echo esc_html( $extra['secondary_p'.$i.'_name'] ); ?></strong></div>
+								<div class="c">Màu: <span><?php echo esc_html( $extra['secondary_p'.$i.'_color'] ); ?></span></div>
+								<div class="s">Dung lượng: <span><?php echo esc_html( $extra['secondary_p'.$i.'_storage'] ); ?></span></div>
+							</div>
+						<?php endif; ?>
+						<?php endfor; ?>
+					</div>
+				</div>
+			<?php endif; ?>
+
+
+			<?php if ($extra['more_shipping_info']) : ?>
+				<div class="order-box address">
+					<div class="order-box-l">Người nhận hàng</div>
+					<div class="order-box-v">
+						<div><strong><?php echo esc_html($order->get_shipping_first_name()) ?></strong></div>
+						<div>SĐT: <strong><?php echo esc_html($order->get_shipping_phone()) ?></strong></div>
+					</div>
+				</div>
+			<?php endif; ?>
+
+
+			<?php if ($extra['vat_check']) : ?>
+				<div class="order-box vat-box">
+					<div class="order-box-l">Xuất hóa đơn đỏ</div>
+					<div class="order-box-v">
+						<div>Công ty: <strong><?php echo esc_html($extra['vat_cty']); ?></strong></div>
+						<div>Địa chỉ: <strong><?php echo esc_html($extra['vat_address']); ?></strong></div>
+						<div>Mã số thuế: <strong><?php echo esc_html($extra['vat_tax_num']); ?></strong></div>
+					</div>
+				</div>
+			<?php endif; ?>
+
+
+
 			<div class="order-box noti">
 				<div class="order-box-c">
-					<p>Lưu ý*: Quý khách vui lòng lưu lại thông tin để thuận tiện cho việc nhận hàng.<br/>
-				ShopDunk sẽ liên hệ sớm nhất đến Quý khách ngay khi có sản phẩm.<br/>
-				Số tiền đặt cọc của quý khách sẽ được trừ thằng vào giá sản phẩm khi Quý khách nhận hàng và thanh toán.
-				</p>
+					<p>Lưu ý*: Quý khách vui lòng lưu lại thông tin để thuận tiện cho việc nhận hàng.<br />
+						ShopDunk sẽ liên hệ sớm nhất đến Quý khách ngay khi có sản phẩm.<br />
+						Số tiền đặt cọc của quý khách sẽ được trừ thằng vào giá sản phẩm khi Quý khách nhận hàng và thanh toán.
+					</p>
 				</div>
 			</div>
 
-			
+
 
 		</div>
 

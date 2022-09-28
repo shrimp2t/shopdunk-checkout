@@ -2,7 +2,33 @@
 
 jQuery(function ($) {
 
-
+	// Retry order SD_Checkout
+	$('.sd-retry-pay-btn').on('click', function (e) {
+		e.preventDefault();
+		const btn = $(this);
+		btn.attr('disabled', 'disabled');
+		btn.addClass('loading');
+		const id = $(this).data('id');
+		$.ajax({
+			url: SD_Checkout.ajax_url,
+			type: 'post',
+			data: {
+				action: 'sd_retry_order',
+				id
+			},
+			success: function (res) {
+				console.log('res', res);
+				btn.removeAttr('disabled');
+				btn.removeClass('loading');
+				if (!res.success) {
+					$('.sd-retry-pay-msg').append(res.message).removeClass('hide');
+				} else {
+					// reload page.
+					window.location = window.location;
+				}
+			}
+		});
+	});
 
 	// Auto change cart qty.
 	let updateCartTimeout = false;
@@ -18,33 +44,58 @@ jQuery(function ($) {
 
 	});
 
-	$( '#more_shipping_info' ).on( 'change', function( e ) {
-		const v = $( this ).is( ':checked' ) ? true: false;
-		if ( v ) {
-			$( '.more_shipping_field' ).show();
-		} else {
-			$( '.more_shipping_field' ).hide();
+	// Change secondary products.
+	$('.secondary_ps_name select').on('change', function () {
+		const pn = $(this).val();
+		const i = $(this).data('i');
+		console.log(pn);
+		let colorOptions = [];
+		let storageOptions = [];
+		if (SD_Checkout?.secondary_products[pn]) {
+			SD_Checkout?.secondary_products[pn].colors.map(el => {
+				colorOptions.push(`<option value="${el}">${el}</option>`)
+			});
+			SD_Checkout?.secondary_products[pn].storage.map(el => {
+				storageOptions.push(`<option value="${el}">${el}</option>`)
+			});
 		}
-	} ) ;
 
-	$( '#vat_check' ).on( 'change', function( e ) {
-		const v = $( this ).is( ':checked' ) ? true: false;
-		if ( v ) {
-			$( '.vat_field' ).show();
-		} else {
-			$( '.vat_field' ).hide();
-		}
-	} ) ;
+		$('#secondary_p' + i + '_color').html(colorOptions.join(' '));
+		$('#secondary_p' + i + '_storage').html(storageOptions.join(' '));
 
-	$( '#secondary_check' ).on( 'change', function( e ) {
-		const v = $( this ).is( ':checked' ) ? true: false;
-		if ( v ) {
-			$( '.secondary_ps_field' ).show();
+
+	});
+
+
+	$('#more_shipping_info').on('change', function (e) {
+		const v = $(this).is(':checked') ? true : false;
+		if (v) {
+			$('.more_shipping_field').show();
 		} else {
-			$( '.secondary_ps_field' ).hide();
+			$('.more_shipping_field').hide();
 		}
-	} ) ;
-	$( '#secondary_check, #vat_check, #more_shipping_info' ).trigger( 'change' );
+	});
+
+	$('#vat_check').on('change', function (e) {
+		const v = $(this).is(':checked') ? true : false;
+		if (v) {
+			$('.vat_field').show();
+		} else {
+			$('.vat_field').hide();
+		}
+	});
+
+	$('#secondary_check').on('change', function (e) {
+		const v = $(this).is(':checked') ? true : false;
+		if (v) {
+			$('.secondary_ps_field').show();
+		} else {
+			$('.secondary_ps_field').hide();
+		}
+	});
+
+	
+	$('#secondary_check, #vat_check, #more_shipping_info, .secondary_ps_name select').trigger('change');
 
 
 	$('#sd_shipping_method_field input[name="sd_shipping_method"]').on('change', function () {
@@ -155,7 +206,7 @@ jQuery(function ($) {
 		e.preventDefault();
 		console.log('clcicked');
 		$('.wc_payment_methods li').not(':first-child').removeClass('hide');
-		$( '.other-payment-gateways' ).hide();
+		$('.other-payment-gateways').hide();
 	})
 
 

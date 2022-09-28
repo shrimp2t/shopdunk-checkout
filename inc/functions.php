@@ -286,32 +286,32 @@ function sd_get_order_extra_data($order)
 	$extra = array_merge($meta_extra, $extra);
 
 	$ship_keys = [
-		'full_shipping_address', 
-		'shipping_province_name', 
-		'shipping_qh_name', 
-		'shipping_px_name', 
-		'shipping_province_id', 
-		'shipping_qh_id', 
-		'shipping_px_id', 
-		'shipping_address', 
+		'full_shipping_address',
+		'shipping_province_name',
+		'shipping_qh_name',
+		'shipping_px_name',
+		'shipping_province_id',
+		'shipping_qh_id',
+		'shipping_px_id',
+		'shipping_address',
 	];
 
 	$store_keys = [
-		'store_id', 
-		'store_area', 
-		'store__code', 
-		'store__province', 
-		'store__address', 
-		'store__account', 
+		'store_id',
+		'store_area',
+		'store__code',
+		'store__province',
+		'store__address',
+		'store__account',
 	];
 
-	if ( $extra['shipping_method'] == 'ship' ) {
-		foreach( $store_keys as $k ) {
-			$extra[ $k ] = '';
+	if ($extra['shipping_method'] == 'ship') {
+		foreach ($store_keys as $k) {
+			$extra[$k] = '';
 		}
 	} else {
-		foreach( $ship_keys as $k ) {
-			$extra[ $k ] = '';
+		foreach ($ship_keys as $k) {
+			$extra[$k] = '';
 		}
 	}
 
@@ -340,4 +340,55 @@ function sd_allow_partial_pay($order)
 	}
 
 	return false;
+}
+
+
+function sd_get_products_secondary()
+{
+
+	$products = [
+		'iPhone 14 Pro Max' => [
+			'colors' => [
+				'Deep Purple',
+				'Space Black',
+				'Silver',
+				'Gold'
+			],
+			'storage' => [
+				'128GB',
+				'256GB',
+				'512GB',
+				'1TB'
+			]
+		],
+		'iPhone 14 Pro' => [
+			'colors' => [
+				'Deep Purple',
+				'Space Black',
+				'Silver',
+				'Gold'
+			],
+			'storage' => [
+				'128GB',
+				'256GB',
+				'512GB',
+				'1TB'
+			]
+		],
+		'iPhone 14 Plus' => [
+			'colors' => [
+				'Midnight',
+				'Starlight',
+				'Blue',
+				'Purple'
+			],
+			'storage' => [
+				'128GB',
+				'256GB',
+				'512GB',
+			]
+		]
+	];
+
+	return $products;
 }
