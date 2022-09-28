@@ -41,17 +41,23 @@ wc_get_template('cart/cart.php');
 
 		<div class="col2-set-a" id="customer_details">
 
-			<?php $fields = $checkout->get_checkout_fields('secondary'); ?>
-			<?php if ($fields) : ?>
-				<div class="sd-products-secondary-fields__field-wrapper">
-					<?php
+			<?php
+			if (sd_has_allow_prepay_items()) :
+				$fields = $checkout->get_checkout_fields('secondary'); ?>
+				<?php if ($fields) : ?>
+					<div class="sd-products-secondary-fields__field-wrapper">
+						<?php
 
-					foreach ($fields as $key => $field) {
-						woocommerce_form_field($key, $field, $checkout->get_value($key));
-					}
-					?>
-				</div>
-			<?php endif; ?>
+						foreach ($fields as $key => $field) {
+							woocommerce_form_field($key, $field, $checkout->get_value($key));
+						}
+						?>
+					</div>
+			<?php
+				endif;
+			endif;
+
+			?>
 
 			<?php do_action('woocommerce_checkout_billing'); ?>
 			<?php do_action('woocommerce_checkout_shipping'); ?>

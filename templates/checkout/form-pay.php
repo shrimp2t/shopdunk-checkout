@@ -65,7 +65,7 @@ if (!$extra['odoo_order_id']) {
 				<?php endif; ?>
 
 			<?php } else { ?>
-				<div class="ship-addr">Nhận tại cửa hàng: <strong><?php echo esc_html($extra['store_name']); ?></strong></div>
+				<div class="ship-addr">Nhận tại cửa hàng: <strong><?php echo esc_html($extra['store__address']); ?></strong></div>
 			<?php } ?>
 			<div>Tổng tiền: <strong><?php echo wc_price($order->get_total()); ?></strong></div>
 

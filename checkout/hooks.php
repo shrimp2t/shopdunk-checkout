@@ -297,6 +297,8 @@ function sd_checkout_fields($groups)
 		'priority' => 7,
 	];
 
+
+
 	$products =  sd_get_products_secondary();
 	$product_options = array_combine(array_keys($products), array_keys($products));
 	$product_options = array_merge(['' => 'Chọn sản phẩm'], $product_options);
@@ -373,8 +375,6 @@ function sd_checkout_fields($groups)
 		'required' => false,
 		'priority' => 7,
 	];
-
-
 
 	$groups['more']['vat_check'] = [
 		'label' => "Xuất hóa đơn công ty",
@@ -494,6 +494,11 @@ function sd_woocommerce_checkout_create_order($order, $data = [])
 }
 add_action('woocommerce_checkout_create_order', 'sd_woocommerce_checkout_create_order', 99, 2);
 
+
+
+
+
+
 function sd_change_order_total($number)
 {
 	if (WC()->session->get('_sd_pay_method') === 'part') {
@@ -521,7 +526,7 @@ function sd_woocommerce_valid_order_statuses_for_payment_complete($statuses)
 // add_filter('woocommerce_valid_order_statuses_for_payment_complete', 'sd_woocommerce_valid_order_statuses_for_payment_complete');
 
 /**
- * Undocumented function
+ * Thanh toán một phần.
  *
  * @param WC_Order $order
  * @return void
@@ -557,12 +562,11 @@ function sd_woocommerce_after_pay_action($order)
 	WC()->session->set('_sd_pay_amount', null);
 	WC()->session->set('_sd_pay_method', null);
 
-
 	remove_action('woocommerce_order_get_total', 'sd_change_order_total');
 	remove_action('woocommerce_payment_complete_order_status', 'sd_woocommerce_payment_complete_order_status');
 }
-add_action('woocommerce_before_pay_action', 'sd_woocommerce_before_pay_action', 99);
-add_action('woocommerce_after_pay_action', 'sd_woocommerce_after_pay_action', 99);
+// add_action('woocommerce_before_pay_action', 'sd_woocommerce_before_pay_action', 99);
+// add_action('woocommerce_after_pay_action', 'sd_woocommerce_after_pay_action', 99);
 
 
 /*
@@ -589,7 +593,10 @@ foreach ($hooks as $event => $hooks) {
 }
 */
 
-add_action('woocommerce_new_order', 'sd_send_order_to_odoo_webhook', 10, 2);
+// add_action('woocommerce_new_order', 'sd_send_order_to_odoo_webhook', 10, 2);
+add_action('woocommerce_checkout_order_processed', 'sd_send_order_to_odoo_webhook', 10, 1);
+
+
 
 /**
  * Undocumented function
@@ -630,15 +637,17 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 	// var_dump( $extra );
 	$data_lines = [];
 	$item_notes = [];
+
+	$i = 1;
 	foreach ($payload['line_items'] as $item) {
 
 		$line_item = [
-			'name' => 'Sản phẩm: ' . $item['name'],
+			'name' => "Sản phẩm {$i}: " . $item['name'],
 			'sku' => 'SKU: ' . $item['sku'],
 		];
 		$tt = [];
 		foreach ($item['meta_data'] as $mt) {
-			if (substr($mt['key'], 0, 1) == '_') {
+			if (substr($mt['key'], 0, 1) != '_') {
 				$tt[] = $mt['display_key'] . ": " . $mt['display_value'];
 			}
 		}
@@ -648,6 +657,8 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 		}
 
 		$item_notes[] = join('<br/>', $line_item);
+
+		$i++;
 
 		$data_lines[] = [
 			'sku' => $item['sku'],
@@ -717,7 +728,8 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 			"Địa chỉ giao hàng: " . $extra['full_shipping_address'];
 
 		if ($extra['more_shipping_info']) {
-			$notes['shipping'] .= "\nNgười nhận hàng: " . esc_html($order->get_shipping_first_name()) . "\nSĐT người nhận: " . $order->get_shipping_phone();
+			$notes['shipping'] .= "\nNgười nhận hàng: " . esc_html($order->get_shipping_first_name()) .
+				"\nSĐT người nhận: " . $order->get_shipping_phone();
 		}
 
 		$store_id = ''; // Default store
@@ -741,10 +753,12 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 		$web_id .= '-' . $retry_id;
 	}
 
-	// var_dump( $item_notes );
+	$notes['line_items'] = "<strong>Sản phẩm đã đặt:</strong><br/> " . join("<br/><br/>", $item_notes);
 
-	$note['items'] = "<strong>Sản phẩm đã đặt:</strong><br/> ". str_replace("\n", "<br/>", join("<br/><br/>", $item_notes));
-	$note['customer'] = "<strong>Thông tin khách hàng:</strong><br/> ". str_replace("\n", "<br/>", join("<br/><br/>", $billing)); // 
+	// var_dump( $notes['line_items']);
+	$notes['customer'] = "<strong>Thông tin khách hàng:</strong><br/> Tên: " . esc_html($billing['name']) .
+		"<br/>Phone: " . esc_html($billing['phone']) .
+		"<br/>Email: " . esc_html($billing['email']); // 
 
 	$notes['web_id'] = 'Nguồn: ' . $web_id . " - " . home_url('/');
 
@@ -760,9 +774,7 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 		'billing' => $billing,
 		'shipping' => $shipping,
 		'line_items' => $data_lines,
-		'note_items' => [
-			
-		],
+		'note_items' => [],
 	];
 
 	return $odoo_data;

@@ -319,8 +319,34 @@ function sd_get_order_extra_data($order)
 }
 
 
-function sd_allow_partial_pay($order)
+function sd_has_allow_prepay_items()
+{	
+	
+	$allowed_skus = explode("\n", get_option('sd_partial_pay_allowed_skus'));
+	$allowed_skus = array_map('trim', $allowed_skus);
+	$allowed_skus = array_filter($allowed_skus);
+	if (empty($allowed_skus)) {
+		return false;
+	}
+	/**
+	 * @see WC_Order_Item_Product
+	 */
+	foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+		$sku = $cart_item['data']->get_sku();
+		if (in_array($sku, $allowed_skus)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+function sd_allow_partial_pay($order = null)
 {
+
+	if (!is_a($order, 'WC_Order')) {
+		return false;
+	}
 	$items = $order->get_items('line_item');
 	$allowed_skus = explode("\n", get_option('sd_partial_pay_allowed_skus'));
 	$allowed_skus = array_map('trim', $allowed_skus);
@@ -338,7 +364,6 @@ function sd_allow_partial_pay($order)
 			return true;
 		}
 	}
-
 	return false;
 }
 

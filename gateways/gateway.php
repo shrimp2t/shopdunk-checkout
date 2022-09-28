@@ -123,14 +123,6 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 		// some notes to customer (replace true with false to make it private)
 		// $order->add_order_note('Hey, your order is paid! Thank you!', true);
 
-		// Empty cart
-		$woocommerce->cart->empty_cart();
-
-
-		if (isset($_POST[$this->id . '-admin-note']) && trim($_POST[$this->id . '-admin-note']) != '') {
-			$order->add_order_note(esc_html($_POST[$this->id . '-admin-note']), 1);
-		}
-
 		// Remove cart
 		$woocommerce->cart->empty_cart();
 		// Return thankyou redirect

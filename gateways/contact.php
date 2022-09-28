@@ -77,23 +77,12 @@ class WC_SD_Contact_Payment_Gateway extends WC_Payment_Gateway
 		// Reduce stock levels
 		// wc_reduce_stock_levels($order_id);
 
-
-
-		// some notes to customer (replace true with false to make it private)
-		// $order->add_order_note('Hey, your order is paid! Thank you!', true);
-
-
 		// Remove cart
-		// $woocommerce->cart->empty_cart();
+		$woocommerce->cart->empty_cart();
 		// Return thankyou redirect
 
 		WC()->session->set('sd_checkout_step', 'thank-toan');
 
-		$url =  add_query_arg([
-			'pay_for_order' => $order->get_id(),
-			'order-pay' => $order->get_id(),
-			'key' =>  $order->get_order_key()
-		], $this->get_return_url($order));
 
 		return array(
 			'result' => 'success',

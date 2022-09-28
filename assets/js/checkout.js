@@ -94,7 +94,7 @@ jQuery(function ($) {
 		}
 	});
 
-	
+
 	$('#secondary_check, #vat_check, #more_shipping_info, .secondary_ps_name select').trigger('change');
 
 
@@ -112,14 +112,12 @@ jQuery(function ($) {
 	});
 
 	$('#sd_shipping_method_field input[value="store"]').trigger('change');
-
-
-	// Change Store area
+	
+	// Change Store area.
 
 	$('#sd_store_area').on('change', function () {
 		const v = $(this).val();
 		const lv = $(this).data('lv');
-
 		if (lv != v) {
 			$(this).data('lv', v);
 			const defaultOpt = `<option value="">Chọn cửa hàng</option>`;
@@ -129,13 +127,11 @@ jQuery(function ($) {
 					aOptions.push(`<option value="${el.code}">${el.address}</option>`);
 				}
 			});
-
 			if (!aOptions.length) {
 				aOptions.push(defaultOpt);
 			}
 			$('#sd_store_id').html(aOptions.join(' '));
 		}
-
 	});
 
 
