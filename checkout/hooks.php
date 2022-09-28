@@ -459,8 +459,8 @@ function sd_add_checkout_data($data)
 		}
 	}
 
-	if (isset($data['sd_shipping_method']) &&  $data['sd_shipping_method']) {
- 
+	if (isset($data['sd_shipping_method']) &&  $data['sd_shipping_method'] == 'ship') {
+
 		if (!isset($data['sd_shipping_province_id']) || !$data['sd_shipping_province_id']) {
 			wc_add_notice('Chọn tỉnh/thành phố.', 'error');
 		}
@@ -473,12 +473,15 @@ function sd_add_checkout_data($data)
 		if (!isset($data['shipping_address_1']) || !$data['shipping_address_1']) {
 			wc_add_notice('Thiếu địa chỉ nhận hàng.', 'error');
 		}
+	} else {
+		if (!isset($data['sd_store_id']) || !$data['sd_store_id']) {
+			wc_add_notice('Hãy chọn cửa hàng.', 'error');
+		}
 	}
 
-
-	// wc_add_notice();
-	var_dump($data);
-	die();
+	// // wc_add_notice();
+	// var_dump($data);
+	// die();
 
 	// Validate field here
 
@@ -769,8 +772,8 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 	$store_id = $extra['store_id'];
 
 	if ($extra['shipping_method'] == 'ship') {
-		$billing['state'] = absint($extra['shipping_province_id']);
-		$billing['city'] = absint($extra['shipping_qh_id']);
+		$billing['state'] = "{$extra['shipping_province_id']}";
+		$billing['city'] = "{$extra['shipping_qh_id']}";
 		$address = '';
 		if ($payload['billing']['address_1']) {
 			$address_array[] = $payload['billing']['address_1'];

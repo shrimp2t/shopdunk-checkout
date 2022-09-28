@@ -69,7 +69,7 @@ if (!$extra['odoo_order_id']) {
 			<?php } ?>
 			<div>Tổng tiền: <strong><?php echo wc_price($order->get_total()); ?></strong></div>
 
-			<?php if ($extra['secondary_check']) : ?>
+			<?php if ($extra['vat_check']) : ?>
 				<div class="vat-box">
 					<div class="vat vat-title">Xuất hóa đơn đỏ</div>
 					<div class="vat vat-cty">Công ty: <strong><?php echo esc_html($extra['vat_cty']); ?></strong></div>
@@ -156,9 +156,7 @@ if (!$extra['odoo_order_id']) {
 								<td class="product-name">
 									<?php
 									echo wp_kses_post(apply_filters('woocommerce_order_item_name', $item->get_name(), $item, false));
-
 									do_action('woocommerce_order_item_meta_start', $item_id, $item, $order, false);
-
 									wc_display_item_meta($item);
 
 									do_action('woocommerce_order_item_meta_end', $item_id, $item, $order, false);
