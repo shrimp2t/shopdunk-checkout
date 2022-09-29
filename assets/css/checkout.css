@@ -192,14 +192,17 @@
 	display: block;
 	font-size: 80%;
 }
+
 .shop_table .variation::after {
 	content: '';
 	clear: both;
 	display: block;
 }
+
 .shop_table dt {
 	clear: left;
 }
+
 .shop_table dt,
 .shop_table dd {
 	display: inline-block;
@@ -284,4 +287,10 @@
 .checkout-box.payment-header {
 	background: none;
 	border: none;
+}
+
+#add_payment_method #payment div.payment_box,
+.woocommerce-cart #payment div.payment_box,
+.woocommerce-checkout #payment div.payment_box {
+	background: none;
 }

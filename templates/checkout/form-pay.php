@@ -28,7 +28,7 @@ $GLOBALS['sd_checkout_order_extra'] = $extra;
 
 // var_dump($extra);
 
-if (!$extra['odoo_order_id']) {
+if (!$extra['odoo_order_id'] and 1== 2) {
 ?>
 	<div id="order_review" class="checkout-error">
 		<div class="checkout-box  payment-header">
