@@ -1013,3 +1013,9 @@ if (isset($_GET['debug_payload'])) {
 		die();
 	});
 }
+if (isset($_GET['debug_dx'])) {
+	add_action('wp', function () {
+		sd_load_dia_gioi_vn();
+		die();
+	});
+}

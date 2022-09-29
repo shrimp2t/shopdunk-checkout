@@ -135,7 +135,7 @@ jQuery(function ($) {
 	});
 
 
-
+	// Thay đổi tỉnh
 	$('#sd_shipping_province_id').on('change', function () {
 		const v = $(this).val();
 		const lv = $(this).data('lv');
@@ -163,18 +163,19 @@ jQuery(function ($) {
 		}
 	});
 
+	// Thay đổi quận huyện
 	$('#sd_shipping_qh_id').on('change', function () {
-		const v = $(this).val();
+		const qh_id = $(this).val();
 		const pid = $('#sd_shipping_province_id').val();
 		const lv = $(this).data('lv');
-		const id = `${v}_${pid}`;
+		const id = `${qh_id}_${pid}`;
 
 		if (lv != id) {
 			$(this).data('lv', id);
 			const defaultOpt = `<option value="">Chọn xã/phường</option>`;
 			const aOptions = [];
 			$.each(SD_Checkout.phuong_xa, (index, el) => {
-				if (parseInt(el.province_id) === parseInt(pid) && parseInt(el.id_px) === parseInt(v)) {
+				if ( parseInt(el.qh_id) === parseInt(qh_id)) {
 					aOptions.push(`<option value="${el.code}">${el.name}</option>`);
 				}
 			});

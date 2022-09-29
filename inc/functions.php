@@ -47,7 +47,9 @@ function sd_get_data_stores()
 
 function sd_load_dia_gioi_vn(){
 	$file = fopen(SD_CO_PATH . '/csv/vn-dia-gioi-all.csv', 'r');
-	$file = fopen(SD_CO_PATH . '/csv/tinh.csv', 'r');
+	$tinh_array = [];
+	$qh_array = [];
+	$px_array = [];
 	$array = [];
 	$i = 0;
 	while (($line = fgetcsv($file)) !== FALSE) {
@@ -62,11 +64,36 @@ function sd_load_dia_gioi_vn(){
 		$huyen_code= $line[3];
 		$xa= $line[4];
 		$xa_code= $line[5];
-
 		$tinh = str_replace(['Tỉnh', 'tỉnh', 'Thành phố', 'Thành phố'], '', $tinh);
 
+		$tinh_array[$tinh_code] = [
+			'code' => $tinh_code,
+			'name' => $tinh,
+		];
+		$qh_array[$huyen_code] = [
+			'code' => $huyen_code,
+			'name' => $huyen,
+			'province_id' => $tinh_code,
+		];
 
+		$px_array[$xa_code] = [
+			'code' => $xa_code,
+			'name' => $xa,
+			'qh_id' => $huyen_code,
+		];
 	}
+
+
+	$code = "<?php\n return " . var_export($tinh_array, true) . ';';
+	file_put_contents(SD_CO_PATH . '/inc/data/data-tinh.php', $code);
+	
+	$code = "<?php\n return " . var_export($qh_array, true) . ';';
+	file_put_contents(SD_CO_PATH . '/inc/data/data-quan-huyen.php', $code);
+	
+	$code = "<?php\n return " . var_export($px_array, true) . ';';
+	file_put_contents(SD_CO_PATH . '/inc/data/data-phuong-xa.php', $code);
+	
+
 } 
 
 function sd_get_data_provinces()
@@ -141,7 +168,6 @@ function sd_get_data_quan_huyen()
 		$array[$code] = [
 			'code' => $code,
 			'name' => $name,
-			'province_id' => $name,
 			'province_id' => $id_tinh,
 			'province' => trim($tinh),
 		];
@@ -186,7 +212,7 @@ function sd_get_data_phuong_xa()
 			'code' => $code,
 			'name' => $name,
 			'province_id' => $id_tinh,
-			'id_px' => $id_px,
+			'px_id' => $id_px,
 		];
 		$i++;
 	}
