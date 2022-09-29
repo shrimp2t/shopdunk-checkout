@@ -990,7 +990,6 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null, $retry_id =  '
 			$r = wp_remote_post($url, [
 				'headers'     => array(
 					'Content-Type' => 'application/json',
-					'access-token' => $token
 				),
 				'body'        => json_encode($odoo_data),
 				'method'      => 'POST',
@@ -998,6 +997,10 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null, $retry_id =  '
 				'timeout'     => 120,
 				'redirection' => 5,
 			]);
+			// var_dump( $url );
+			// var_dump( $r );
+			// var_dump( $odoo_data );
+			// die();
 		}
 	}
 
