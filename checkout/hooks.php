@@ -116,7 +116,7 @@ function sd_change_payment_template($template, $template_name, $args, $template_
 
 	return $template;
 }
-add_filter('wc_get_template', 'sd_change_payment_template', 99, 5);
+add_filter('wc_get_template', 'sd_change_payment_template', 9999, 5);
 
 
 
@@ -199,6 +199,7 @@ function sd_checkout_fields($groups)
 	$groups['billing']['billing_first_name']['class'] = 'form-row-wide';
 	$groups['shipping']['shipping_first_name']['class'] = 'form-row-wide';
 	$groups['shipping']['shipping_address_1']['required'] = false;
+	$groups['shipping']['shipping_address_1']['class'] = 'form-row-half';
 	$groups['shipping']['shipping_state']['required'] = false;
 	$groups['billing']['billing_email']['required'] = false;
 
@@ -234,7 +235,7 @@ function sd_checkout_fields($groups)
 		'type' => "radio",
 		'class' => 'form-row-wide',
 		'options' => [
-			'store' => 'Nhận tại cửa hàng',
+			'store' => 'Nhận tại',
 			'ship' => 'Giao tận nơi',
 		],
 		'default' =>  sd_get_value_from_array('sd_shipping_method', $session_data, 'store'),
@@ -271,7 +272,7 @@ function sd_checkout_fields($groups)
 	$groups['shipping']['sd_shipping_province_id'] = [
 		'label' => "Tỉnh/Thành Phố",
 		'type' => "select",
-		'class' => 'form-row-wide',
+		'class' => 'form-row-half',
 		'options' => $provinces,
 		'default' => sd_get_value_from_array('sd_shipping_province_id', $session_data, '01'),
 		'required' => false,
@@ -281,7 +282,7 @@ function sd_checkout_fields($groups)
 	$groups['shipping']['sd_shipping_qh_id'] = [
 		'label' => "Quận/huyện",
 		'type' => "select",
-		'class' => 'form-row-wide',
+		'class' => 'form-row-half',
 		'options' => [
 			'' => 'Chọn quận/huyện',
 		],
@@ -292,7 +293,7 @@ function sd_checkout_fields($groups)
 	$groups['shipping']['sd_shipping_px_id'] = [
 		'label' => "Phường/Xã",
 		'type' => "select",
-		'class' => 'form-row-wide',
+		'class' => 'form-row-half',
 		'options' => [
 			'' => 'Chọn phường/xã',
 		],
@@ -377,7 +378,7 @@ function sd_checkout_fields($groups)
 	$groups['shipping']['shipping_first_name'] = [
 		'placeholder' => "Họ và tên người nhận",
 		'type' => "text",
-		'class' => 'more_shipping_field form-row-wide',
+		'class' => 'more_shipping_field form-row-half',
 		'default' => '',
 		'required' => false,
 		'priority' => 88
@@ -386,7 +387,7 @@ function sd_checkout_fields($groups)
 	$groups['shipping']['shipping_phone'] = [
 		'placeholder' => "Số điện thoại",
 		'type' => "text",
-		'class' => 'more_shipping_field form-row-wide',
+		'class' => 'more_shipping_field form-row-half',
 		'default' => '',
 		'required' => false,
 		'priority' => 88
@@ -723,7 +724,7 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 
 		$data_lines[] = [
 			'sku' => $item_product->get_sku(),
-			'price' => $item_product->get_price(),
+			'price' => floatval($item_product->get_price()),
 			"product_id" => "",
 			"variant_id" => "",
 			"quantity" => $item->get_quantity(),
@@ -733,7 +734,7 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 			"subtotal_tax" => '',
 			"discount_amount" => '',
 			"discount_percent" => '',
-			"total" => $item->get_total(),
+			"total" => floatval($item->get_total()),
 			"shipping_total" => '',
 			"discount_total" => '',
 		];
@@ -815,7 +816,13 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 	}
 
 	$shipping = $payload['shipping'];
-
+	$shipping['address'] = $shipping['address_1'];
+	if (!isset($shipping['name']) || !$shipping['name']) {
+		$shipping['name'] = $billing['name'];
+	}
+	if (!$shipping['phone']) {
+		$shipping['phone'] = $billing['phone'];
+	}
 
 	if ($extra['more_shipping_info']) {
 		$shipping['name'] = trim($payload['shipping']['first_name'] . ' ' . $payload['shipping']['last_name']);
@@ -852,6 +859,7 @@ function get_get_payload_for_odoo($order, $retry_id = null)
 		'shipping' => $shipping,
 		'line_items' => $data_lines,
 		'note_items' => [],
+		'extra' => $extra,
 	];
 
 	if (!empty($red_invoice)) {
@@ -974,13 +982,33 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null, $retry_id =  '
 		$order->save_meta_data();
 	}
 
+	$webhook_urls =  get_option('sd_webhook_urls');
+	$webhook_urls  = explode("\n", $webhook_urls);
+	$webhook_urls  = array_filter(array_map('trim', $webhook_urls));
+	if (!empty($webhook_urls)) {
+		foreach ($webhook_urls as $url) {
+			$r = wp_remote_post($url, [
+				'headers'     => array(
+					'Content-Type' => 'application/json',
+					'access-token' => $token
+				),
+				'body'        => json_encode($odoo_data),
+				'method'      => 'POST',
+				'data_format' => 'body',
+				'timeout'     => 120,
+				'redirection' => 5,
+			]);
+		}
+	}
+
+
 	$body['id'] = $id;
 	return [
 		'success' => $success,
 		'body' => $body,
 		'status_code' => $http_code,
 		'message' => $message,
-		'odoo_data' => $odoo_data,
+		//'odoo_data' => $odoo_data,
 	];
 }
 

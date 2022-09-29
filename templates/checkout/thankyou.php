@@ -18,6 +18,12 @@
 
 defined('ABSPATH') || exit;
 
+if ( ! $order  ) {
+	?>
+	<div class="pay-order-not-found">Không tìm thấy đơn hàng</div>
+	<?php
+	return;
+}
 
 $show_purchase_note    = $order->has_status(apply_filters('woocommerce_purchase_note_order_statuses', array('completed', 'processing')));
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();

@@ -33,6 +33,11 @@ if (!wp_doing_ajax()) {
 
 	<div class="form-row place-order">
 
+		<div class="co-flex">
+			<div class="co-flex-l">Tổng tiền</div>
+			<div class="co-flex-v"><?php echo WC()->cart->get_total(); ?></div>
+		</div>
+
 
 		<?php wc_get_template('checkout/terms.php'); ?>
 

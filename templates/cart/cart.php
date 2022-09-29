@@ -22,9 +22,9 @@ do_action('woocommerce_before_cart'); ?>
 
 <form class="woocommerce-cart-form" action="<?php echo esc_url(wc_get_cart_url()); ?>" method="post">
 	<?php do_action('woocommerce_before_cart_table'); ?>
-	<table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellspacing="0">
+	<div class="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellspacing="0">
 
-		<tbody>
+		<div class="tbody">
 			<?php do_action('woocommerce_before_cart_contents'); ?>
 
 			<?php
@@ -35,39 +35,41 @@ do_action('woocommerce_before_cart'); ?>
 				if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_cart_item_visible', true, $cart_item, $cart_item_key)) {
 					$product_permalink = apply_filters('woocommerce_cart_item_permalink', $_product->is_visible() ? $_product->get_permalink($cart_item) : '', $cart_item, $cart_item_key);
 			?>
-					<tr class="woocommerce-cart-form__cart-item <?php echo esc_attr(apply_filters('woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key)); ?>">
+					<div class="tr woocommerce-cart-form__cart-item <?php echo esc_attr(apply_filters('woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key)); ?>">
 
-						<td class="product-name" data-title="<?php esc_attr_e('Product', 'woocommerce'); ?>">
+						<div class="td tcol-1 product-name" data-title="<?php esc_attr_e('Product', 'woocommerce'); ?>">
 							<div class="cart-product-info">
-								<?php
-								$thumbnail = apply_filters('woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key);
+								<div class="thumb">
+									<?php
+									$thumbnail = apply_filters('woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key);
 
-								if (!$product_permalink) {
-									echo $thumbnail; // PHPCS: XSS ok.
-								} else {
-									printf('<a href="%s">%s</a>', esc_url($product_permalink), $thumbnail); // PHPCS: XSS ok.
-								}
-								?>
+									if (!$product_permalink) {
+										echo $thumbnail; // PHPCS: XSS ok.
+									} else {
+										printf('<a href="%s">%s</a>', esc_url($product_permalink), $thumbnail); // PHPCS: XSS ok.
+									}
+									?>
+								</div>
+								<div class="pif">
+									<?php
+									if (!$product_permalink) {
+										echo wp_kses_post(apply_filters('woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key) . '&nbsp;');
+									} else {
+										echo wp_kses_post(apply_filters('woocommerce_cart_item_name', sprintf('<a href="%s">%s</a>', esc_url($product_permalink), $_product->get_name()), $cart_item, $cart_item_key));
+									}
 
-								<?php
-								if (!$product_permalink) {
-									echo wp_kses_post(apply_filters('woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key) . '&nbsp;');
-								} else {
-									echo wp_kses_post(apply_filters('woocommerce_cart_item_name', sprintf('<a href="%s">%s</a>', esc_url($product_permalink), $_product->get_name()), $cart_item, $cart_item_key));
-								}
+									do_action('woocommerce_after_cart_item_name', $cart_item, $cart_item_key);
 
-								do_action('woocommerce_after_cart_item_name', $cart_item, $cart_item_key);
+									// Meta data.
+									echo wc_get_formatted_cart_item_data($cart_item); // PHPCS: XSS ok.
 
-								// Meta data.
-								echo wc_get_formatted_cart_item_data($cart_item); // PHPCS: XSS ok.
-
-								// Backorder notification.
-								if ($_product->backorders_require_notification() && $_product->is_on_backorder($cart_item['quantity'])) {
-									echo wp_kses_post(apply_filters('woocommerce_cart_item_backorder_notification', '<p class="backorder_notification">' . esc_html__('Available on backorder', 'woocommerce') . '</p>', $product_id));
-								}
-								?>
+									// Backorder notification.
+									if ($_product->backorders_require_notification() && $_product->is_on_backorder($cart_item['quantity'])) {
+										echo wp_kses_post(apply_filters('woocommerce_cart_item_backorder_notification', '<p class="backorder_notification">' . esc_html__('Available on backorder', 'woocommerce') . '</p>', $product_id));
+									}
+									?>
+								</div>
 							</div>
-
 
 
 							<span class="product-remove">
@@ -85,12 +87,12 @@ do_action('woocommerce_before_cart'); ?>
 								);
 								?>
 							</span>
-						</td>
+						</div>
 
 
 
 
-						<td class="product-subtotal" data-title="<?php esc_attr_e('Subtotal', 'woocommerce'); ?>">
+						<div class="td tcol-2 product-subtotal" data-title="<?php esc_attr_e('Subtotal', 'woocommerce'); ?>">
 							<?php
 							echo apply_filters('woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal($_product, $cart_item['quantity']), $cart_item, $cart_item_key); // PHPCS: XSS ok.
 							?>
@@ -117,33 +119,29 @@ do_action('woocommerce_before_cart'); ?>
 							?>
 
 
-						</td>
-					</tr>
+						</div>
+					</div>
 			<?php
 				}
 			}
 			?>
-
 			<?php do_action('woocommerce_cart_contents'); ?>
-
-
-
 			<?php do_action('woocommerce_after_cart_contents'); ?>
-		</tbody>
-		<tfoot class="cart_totals <?php echo (WC()->customer->has_calculated_shipping()) ? 'calculated_shipping' : ''; ?>">
-			<tr>
-				<td colspan="" class="">
+		</div>
+		<div class="tfoot cart_totals <?php echo (WC()->customer->has_calculated_shipping()) ? 'calculated_shipping' : ''; ?>">
+			<div class="tr">
+				<div colspan="" class="td tcol-1">
 					Tạm tính
-				</td>
-				<td colspan="" class="">
+				</div>
+				<div colspan="" class="td tcol-2">
 					<?php wc_cart_totals_order_total_html(); ?>
-				</td>
-			</tr>
-		</tfoot>
-	</table>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<button style="display: none;" type="submit" class="button" name="update_cart" value="<?php esc_attr_e('Update cart', 'woocommerce'); ?>"><?php esc_html_e('Update cart', 'woocommerce'); ?></button>
-	
+
 	<?php do_action('woocommerce_cart_actions'); ?>
 	<?php wp_nonce_field('woocommerce-cart', 'woocommerce-cart-nonce'); ?>
 	<?php wp_nonce_field('woocommerce-cart', 'woocommerce-cart-nonce'); ?>

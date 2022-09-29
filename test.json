@@ -1,0 +1,52 @@
+{
+	"web_id": "",
+	"created_via": "webshop",
+	"pos_id": "",
+	"seller_id": "",
+	"customer_id": "",
+	"customer_note": "<strong>Khách hàng ghi chú:</strong><br/><br/><strong>Xưng danh:</strong> Anh<br/><br/>Phương thức nhận hàng: Giao tận nơi.<br/>Địa chỉ giao hàng: Anland, Thị trấn Chi Đông, Huyện Mê Linh,  Hà Nội<br/><br/><strong>Sản phẩm đã đặt:</strong><br/> Sản phẩm 1: iPhone 13 Pro<br/>SKU: MLV93VN/A<br/>Chọn màu: Graphite<br/>Chọn Dung lượng: 128GB<br/><br/><strong>Thông tin khách hàng:</strong><br/> Tên: Huong test<br/>Phone: 0962370186<br/>Email: nguyenthanhhuong.hailong@gmail.com<br/><br/>Nguồn: 64044-tinsamcenter.wpcomstaging.com-1664419462 - https://tinsamcenter.wpcomstaging.com/",
+	"status": "quotation",
+	"currency": "VND",
+	"billing": {
+	  "title": "Anh",
+	  "name": "Huong test",
+	  "phone": "0962370186",
+	  "email": "nguyenthanhhuong.hailong@gmail.com",
+	  "state": "01",
+	  "city": "250",
+	  "address": "Anland, Thị trấn Chi Đông",
+	  "country": "VN"
+	},
+	"shipping": {
+	  "first_name": "sadasdad",
+	  "last_name": "",
+	  "company": "",
+	  "address": "Anland",
+	  "address_2": "",
+	  "city": "",
+	  "state": "",
+	  "postcode": "",
+	  "country": "VN",
+	  "phone": "12321312213",
+	  "method": "ship"
+	},
+	"line_items": [
+	  {
+		"sku": "MLV93VN/A",
+		"price": 24590000,
+		"product_id": "",
+		"variant_id": "",
+		"quantity": 1,
+		"temp_price": "",
+		"subtotal": "",
+		"total_tax": "",
+		"subtotal_tax": "",
+		"discount_amount": "",
+		"discount_percent": "",
+		"total": 24590000,
+		"shipping_total": "",
+		"discount_total": ""
+	  }
+	],
+	"note_items": []
+  }

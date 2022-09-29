@@ -35,61 +35,73 @@ wc_get_template('cart/cart.php');
 
 <form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url(wc_get_checkout_url()); ?>" enctype="multipart/form-data">
 
-	<?php if ($checkout->get_checkout_fields()) : ?>
+	<div class="checkout-section">
+		<?php if ($checkout->get_checkout_fields()) : ?>
 
-		<?php do_action('woocommerce_checkout_before_customer_details'); ?>
+			<?php do_action('woocommerce_checkout_before_customer_details'); ?>
 
-		<div class="col2-set-a" id="customer_details">
+			<div class="col2-set-a" id="customer_details">
 
-			<?php
-			if (sd_has_allow_prepay_items()) :
-				$fields = $checkout->get_checkout_fields('secondary'); ?>
-				<?php if ($fields) : ?>
-					<div class="sd-products-secondary-fields__field-wrapper">
-						<?php
-
-						foreach ($fields as $key => $field) {
-							woocommerce_form_field($key, $field, $checkout->get_value($key));
-						}
-						?>
-					</div>
-			<?php
-				endif;
-			endif;
-			?>
-
-			<?php do_action('woocommerce_checkout_billing'); ?>
-			<?php do_action('woocommerce_checkout_shipping'); ?>
-
-		</div>
-
-		<?php do_action('woocommerce_checkout_after_customer_details'); ?>
-
-		<?php $fields = $checkout->get_checkout_fields('more'); ?>
-		<?php if ($fields) : ?>
-			<div class="sd-more-fields__field-wrapper">
 				<?php
-				foreach ($fields as $key => $field) {
-					woocommerce_form_field($key, $field, $checkout->get_value($key));
-				}
+				if (sd_has_allow_prepay_items()) :
+					$fields = $checkout->get_checkout_fields('secondary'); ?>
+					<?php if ($fields) : ?>
+						<div class="sd-products-secondary-fields__field-wrapper">
+							<?php
+
+							foreach ($fields as $key => $field) {
+								woocommerce_form_field($key, $field, $checkout->get_value($key));
+							}
+							?>
+						</div>
+				<?php
+					endif;
+				endif;
 				?>
+
+				<?php do_action('woocommerce_checkout_billing'); ?>
+				<?php do_action('woocommerce_checkout_shipping'); ?>
+
 			</div>
+
+			<?php do_action('woocommerce_checkout_after_customer_details'); ?>
+
+			<?php $fields = $checkout->get_checkout_fields('more'); ?>
+			<?php if ($fields) : ?>
+				<div class="sd-more-fields__field-wrapper">
+					<?php
+					foreach ($fields as $key => $field) {
+						woocommerce_form_field($key, $field, $checkout->get_value($key));
+					}
+					?>
+				</div>
+			<?php endif; ?>
+
 		<?php endif; ?>
 
-	<?php endif; ?>
+		<?php do_action('woocommerce_checkout_before_order_review_heading'); ?>
 
-	<?php do_action('woocommerce_checkout_before_order_review_heading'); ?>
+		<?php /*
+		<h3 id="order_review_heading"><?php esc_html_e('Your order', 'woocommerce'); ?></h3>
+		<?php do_action('woocommerce_checkout_before_order_review'); ?>
+		<div id="order_review" class="woocommerce-checkout-review-order">
+			<?php do_action('woocommerce_checkout_order_review'); ?>
+		</div>
+		*/ ?>
 
-	<h3 id="order_review_heading"><?php esc_html_e('Your order', 'woocommerce'); ?></h3>
 
-	<?php do_action('woocommerce_checkout_before_order_review'); ?>
-
-	<div id="order_review" class="woocommerce-checkout-review-order">
-		<?php do_action('woocommerce_checkout_order_review'); ?>
 	</div>
 
-	<?php do_action('woocommerce_checkout_after_order_review'); ?>
+	<div class="checkout-section">
 
+	<?php 
+	
+	do_action('woocommerce_checkout_after_order_review');
+	woocommerce_checkout_payment();
+	
+	?>
+
+	</div>
 </form>
 
 <?php do_action('woocommerce_after_checkout_form', $checkout); ?>

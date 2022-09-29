@@ -60,6 +60,13 @@ jQuery(function ($) {
 			});
 		}
 
+		if ( ! colorOptions.length ) {
+			colorOptions.push(`<option value="">Chọn màu</option>`)
+		}
+		if ( ! storageOptions.length ) {
+			storageOptions.push(`<option value="">Chọn dung lượng</option>`)
+		}
+
 		$('#secondary_p' + i + '_color').html(colorOptions.join(' '));
 		$('#secondary_p' + i + '_storage').html(storageOptions.join(' '));
 

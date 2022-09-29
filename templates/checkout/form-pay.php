@@ -48,12 +48,12 @@ if (!$extra['odoo_order_id']) {
 
 		<div class="checkout-box payment-header">
 			<div class="payment-icon-success"></div>
-			<h2>Đặt hàng thành công.</h2>
+			<h2>Tạo đơn hàng thành công.</h2>
 			<p><?php echo esc_html(sprintf('Cám ơn %s %s đã cho ShopDunk cơ hội được phục vụ', $extra['billing_title'], $order->get_billing_first_name())) ?></p>
 		</div>
 
 		<div class="checkout-box  payment-billing">
-			<div class="oid">ID đơng hàng: <strong><?php echo esc_html($extra['odoo_order_id']); ?></strong></div>
+			<div class="oid">Mã đơng hàng: <strong><?php echo esc_html($extra['odoo_order_id']); ?></strong></div>
 			<?php if ($extra['shipping_method'] == 'ship') { ?>
 				<div class="ship-addr">Giao hàng tận nơi: <strong><?php echo esc_html($extra['full_shipping_address']); ?></strong></div>
 
@@ -80,7 +80,7 @@ if (!$extra['odoo_order_id']) {
 		</div>
 
 		<?php if (in_array($order->get_status(), ['pending'])) { ?>
-			<div class="checkout-box  payment-order-status">Đơn hàng chưa được thanh toán.</div>
+			<div class="checkout-box  payment-order-status-pending">Đơn hàng chưa được thanh toán.</div>
 		<?php } ?>
 		<?php
 		/*

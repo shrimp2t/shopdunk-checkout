@@ -1,0 +1,53 @@
+{
+	"web_id": "",
+	"created_via": "webshop",
+	"pos_id": "",
+	"seller_id": "",
+	"customer_id": "",
+	"customer_note": "<strong>Khách hàng ghi chú:</strong><br/><br/><strong>Xưng danh:</strong> Anh<br/><br/>Phương thức nhận hàng: Giao tận nơi.<br/>Địa chỉ giao hàng: 12 Xóm núi, Phường 5, Thành phố Mỹ Tho,  Tiền Giang<br/><br/><strong>Sản phẩm đã đặt:</strong><br/> Sản phẩm 1: iPhone 13 Pro Max<br/>SKU: MLL93VN/A<br/>Chọn màu:: Sierra Blue<br/>Chọn Dung lượng: 128GB<br/><br/><strong>Thông tin khách hàng:</strong><br/> Tên: Sa Trường CB<br/>Phone: 01233456389<br/>Email: dev-email@flywheel.local<br/><br/>Nguồn: 2374-findgru.local-1664419949 - http://findgru.local/",
+	"status": "quotation",
+	"currency": "VND",
+	"billing": {
+		"title": "Anh",
+		"name": "Sa Trường CB",
+		"phone": "01233456389",
+		"email": "dev-email@flywheel.local",
+		"state": "82",
+		"city": "815",
+		"address": "12 Xóm núi, Phường 5",
+		"country": "VN"
+	},
+	"shipping": {
+		"first_name": "Người nhận hàng",
+		"last_name": "",
+		"company": "",
+		"address_1": "12 Xóm núi",
+		"address_2": "",
+		"city": "",
+		"state": "",
+		"postcode": "",
+		"country": "",
+		"phone": "12323432434",
+		"name": "Sa Trường CB",
+		"method": "ship"
+	},
+	"line_items": [
+		{
+			"sku": "MLL93VN/A",
+			"price": 27590000,
+			"product_id": "",
+			"variant_id": "",
+			"quantity": 1,
+			"temp_price": "",
+			"subtotal": "",
+			"total_tax": "",
+			"subtotal_tax": "",
+			"discount_amount": "",
+			"discount_percent": "",
+			"total": "27590000",
+			"shipping_total": "",
+			"discount_total": ""
+		}
+	],
+	"note_items": []
+}
