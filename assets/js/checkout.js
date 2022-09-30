@@ -2,6 +2,53 @@
 
 jQuery(function ($) {
 
+
+	// Count down clock
+
+	function countdown_clock_init(el) {
+		const second = 1000,
+			minute = second * 60,
+			hour = minute * 60,
+			day = hour * 24;
+
+	
+		const rt = el.data('time');
+	
+
+		let countDown = new Date().getTime() + rt * 1000,
+
+			x = setInterval(function () {
+
+				let now = new Date().getTime(),
+					distance = countDown - now;
+
+				let h = ``;
+				let m = ``;
+				let s = ``;
+				m = Math.floor((distance) / (minute));
+				s = Math.floor((distance % (minute)) / second);
+				// h = Math.floor((distance) / (hour));
+				
+				h = h.toString().padStart(2, 0);
+				m = m.toString().padStart(2, 0);
+				s = s.toString().padStart(2, 0);
+				el.html( `${m}:${s}` );
+
+				if (distance < 0) {
+					
+				  clearInterval(x);
+				}
+			}, second)
+	}
+
+	$('.checkout-box-clock').each(function () {
+		countdown_clock_init($(this));
+	})
+
+
+
+
+
 	// Retry order SD_Checkout
 	$('.sd-retry-pay-btn').on('click', function (e) {
 		e.preventDefault();

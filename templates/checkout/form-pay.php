@@ -88,13 +88,21 @@ if (!$extra['odoo_order_id']) {
 		<?php } ?>
 
 		<div class="checkout-box">
-			<div class="checkout-box-clock">59:40</div>
-			Đơn hàng được hoàn thành khi bạn chuyển khoản trong vòng 60p Kể từ thời điểm đặt hàng (<?php echo $order->get_date_created(); ?>).
-			Nếu trong 60p việc đặt cọc không hoàn tất, đơn hàng sẽ bị huỷ, khi đó bạn cần tạo lại đơn hàng mới.
+			<?php
+			// new WC_Order()
+			// new WC_DateTime();
+			$wait = absint(get_option('woocommerce_hold_stock_minutes'));
+			$end = strtotime($order->get_date_created('edit'))  + $wait * MINUTE_IN_SECONDS;
+			$remain =  $end - current_time('timestamp',  $order->get_date_created('edit')->getOffset());
+			$date_string =  'Ngày '. $order->get_date_created()->date_i18n( get_option('date_format') ) .' lúc '.$order->get_date_created()->date_i18n( get_option('time_format') );
+
+			?>
+			<div class="checkout-box-clock" data-time="<?php echo esc_attr($remain); ?>">00:00</div>
+			Đơn hàng được hoàn thành khi bạn chuyển khoản trong vòng <?php echo $wait; ?> phút kể từ thời điểm đặt hàng (<?php echo $date_string; ?>).
+			Nếu trong <?php echo $wait; ?> phút việc đặt cọc không hoàn tất, đơn hàng sẽ bị huỷ, khi đó bạn cần tạo lại đơn hàng mới.
 		</div>
-
-
 		<?php
+		
 		/*
 		$allow_pay = sd_allow_partial_pay($order);
 		$part_amount =  get_option('sd_partial_order_amount');

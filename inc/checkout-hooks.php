@@ -705,6 +705,8 @@ if (isset($_GET['debug'])) {
 	});
 }
 
+// woocommerce_hold_stock_minutes
+
 if (isset($_GET['debug_meta'])) {
 	add_action('wp', function () {
 		echo get_post_meta($_GET['debug_meta'], '_odoo_request_data', true);

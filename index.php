@@ -30,7 +30,7 @@ add_action('plugins_loaded', function () {
 
 	$load = false;
 	$test_on_live =  get_option('sd_checkout_test_on_live');
-	if ($test_on_live) {
+	if (wc_string_to_bool( $test_on_live )) {
 		if (isset($_COOKIE['sd_co_live_test']) && $_COOKIE['sd_co_live_test'] == 'on') {
 			$load = true;
 		}
