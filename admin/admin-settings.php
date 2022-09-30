@@ -27,11 +27,11 @@ function sd_checkout_settings( $settings, $current_section ) {
 		$settings[] = array( 'name' => __( 'Shopdunk Payment Settings', 'text-domain' ), 'type' => 'title', 'desc' => __( 'The following options are used to configure WC Slider', 'text-domain' ), 'id' => 'shopdunk_settings' );
 		// Add first checkbox option
 		$settings[] = array(
-			'name'     => __( 'Bật tính năng', 'text-domain' ),
-			'id'       => 'sd_payment_option_enable',
+			'name'     => __( 'Test on LIVE', 'text-domain' ),
+			'id'       => 'sd_checkout_test_on_live',
 			'type'     => 'checkbox',
 			'css'      => 'min-width:300px;',
-			'desc'     => __( 'Check vào đây để bật các tính năng.', 'text-domain' ),
+			'desc'     => __( 'Check vào đây để bật tính năng test trên live. Khi tính năng này được bật sẽ không thấy các payment gateway của Shopdunk. nó chỉ được kích hoạt khi thêm tham số <code>sd_co_live_test=on</code> vào URL bất kỳ. Để hủy việc kích hoạt thêm tham số <code>sd_co_live_test=off</code> vào URL bất kỳ.', 'text-domain' ),
 		);
 
 		$settings[] = array(
@@ -60,7 +60,7 @@ function sd_checkout_settings( $settings, $current_section ) {
 		);
 
 		$settings[] = array(
-			'name'     => __( 'Sản phẩm cho phép cọc', 'text-domain' ),
+			'name'     => __( 'Sản phẩm cho phép thanh toán một phần', 'text-domain' ),
 			'id'       => 'sd_partial_pay_allowed_skus',
 			'type'     => 'textarea',
 			'custom_attributes' => [
@@ -73,7 +73,7 @@ function sd_checkout_settings( $settings, $current_section ) {
 		);
 
 		$settings[] = array(
-			'name'     => __( 'Số tiền cọc', 'text-domain' ),
+			'name'     => __( 'Số tiền thanh toán một phần', 'text-domain' ),
 			'id'       => 'sd_partial_order_amount',
 			'type'     => 'number',
 			'desc'     => __( 'Số tiền cọc', 'text-domain' ),
