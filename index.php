@@ -17,6 +17,9 @@ define('SD_API_ORDERS', 'http://shopdunk-integration.reach.com.vn/api/v1/orders'
 
 
 add_action('plugins_loaded', function () {
+	if ( ! function_exists('WC') ) {
+		return ;
+	}
 	require dirname(__FILE__) . '/inc/functions.php';
 	require dirname(__FILE__) . '/inc/form-field.php';
 	require dirname(__FILE__) . '/inc/assets.php';

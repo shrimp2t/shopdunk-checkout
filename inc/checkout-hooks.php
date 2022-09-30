@@ -1,6 +1,6 @@
 <?php
-add_filter( 'jetpack_lazy_images_blacklisted_classes', 'sd_exclude_custom_logo_class_from_lazy_load', 9999 );
- 
+add_filter('jetpack_lazy_images_blacklisted_classes', 'sd_exclude_custom_logo_class_from_lazy_load', 9999);
+
 
 
 function sd_ajax_checkout_handle_action()
@@ -161,7 +161,6 @@ add_filter('woocommerce_register_shop_order_post_statuses', 'sd_woocommerce_regi
 
 add_filter('woocommerce_cart_needs_shipping', '__return_true', 9999);
 add_filter('woocommerce_cart_needs_shipping_address', '__return_true', 9999);
-
 
 // add_action( 'woocommerce_checkout_create_order', $order, $data );
 
@@ -324,7 +323,7 @@ add_action('woocommerce_checkout_order_created', 'sd_send_order_to_odoo_webhook'
 
 
 /**
- * Undocumented function
+ * Add More data to API order response.
  *
  * @param WP_REST_Response $response
  * @param WC_Order $object
@@ -335,7 +334,7 @@ function sd_woocommerce_rest_prepare_shop_order_object($response, $object)
 	$extra = sd_get_order_extra_data($object);
 	$more_data = $object->get_meta('_sd_more_info', true);
 	$more_data  = is_array($more_data) ? $more_data : [];
-	$extra = array_merge($extra, $more_data);
+	$extra = array_merge($more_data, $extra);
 	$response->data['extra'] = $extra;
 	return $response;
 }
@@ -622,7 +621,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null, $retry_id =  '
 			$id =  $body['id'];
 			$payment_message =  $body['payment_message'];
 		}
-		
+
 		if (!$id && isset($body['result']['data']['id'])) {
 			$id = $body['result']['data']['id'];
 			$payment_message = $body['result']['data']['payment_message'];
