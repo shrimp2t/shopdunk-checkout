@@ -60,10 +60,10 @@ jQuery(function ($) {
 			});
 		}
 
-		if ( ! colorOptions.length ) {
+		if (!colorOptions.length) {
 			colorOptions.push(`<option value="">Chọn màu</option>`)
 		}
-		if ( ! storageOptions.length ) {
+		if (!storageOptions.length) {
 			storageOptions.push(`<option value="">Chọn dung lượng</option>`)
 		}
 
@@ -119,7 +119,7 @@ jQuery(function ($) {
 	});
 
 	$('#sd_shipping_method_field input[value="store"]').trigger('change');
-	
+
 	// Change Store area.
 
 	$('#sd_store_area').on('change', function () {
@@ -182,7 +182,7 @@ jQuery(function ($) {
 			const defaultOpt = `<option value="">Chọn xã/phường</option>`;
 			const aOptions = [];
 			$.each(SD_Checkout.phuong_xa, (index, el) => {
-				if ( parseInt(el.qh_id) === parseInt(qh_id)) {
+				if (parseInt(el.qh_id) === parseInt(qh_id)) {
 					aOptions.push(`<option value="${el.code}">${el.name}</option>`);
 				}
 			});
@@ -202,16 +202,19 @@ jQuery(function ($) {
 	$('#sd_shipping_province_id').trigger('change');
 
 
-	// Chọn phương thức thanh toán.
-	const $morebtn = $('<a class="other-payment-gateways" href="#">Xem thêm các phương thức thanh toán khác</a>');
-	$('.wc_payment_methods li:first-child').append($morebtn)
-	$('.wc_payment_methods li').not(':first-child').addClass('hide');
-	$(document).on('click', '.other-payment-gateways', function (e) {
-		e.preventDefault();
-		console.log('clcicked');
-		$('.wc_payment_methods li').not(':first-child').removeClass('hide');
-		$('.other-payment-gateways').hide();
-	})
+	if ($('.wc_payment_methods li').length > 1) {
+		// Chọn phương thức thanh toán.
+		const $morebtn = $('<a class="other-payment-gateways" href="#">Xem thêm các phương thức thanh toán khác</a>');
+		$('.wc_payment_methods li:first-child').append($morebtn)
+		$('.wc_payment_methods li').not(':first-child').addClass('hide');
+		$(document).on('click', '.other-payment-gateways', function (e) {
+			e.preventDefault();
+			console.log('clcicked');
+			$('.wc_payment_methods li').not(':first-child').removeClass('hide');
+			$('.other-payment-gateways').hide();
+		})
+
+	}
 
 
 

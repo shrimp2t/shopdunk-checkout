@@ -294,8 +294,8 @@ function sd_get_order_extra_data($order)
 	$shipping_px_id = sd_get_value_from_array('shipping_px_id', $meta_extra, '');
 
 	$odoo_order_id = $order->get_meta('_odoo_order_id', true);
+	$odoo_so_id = $order->get_meta('_odoo_so_id', true);
 	$odoo_order_payment_message = $order->get_meta('_odoo_order_payment_message', true);
-
 
 	$address = '';
 	if ($order->get_billing_address_1()) {
@@ -306,6 +306,7 @@ function sd_get_order_extra_data($order)
 
 	$extra =  [
 		'id' => $order->get_id(),
+		'odoo_so_id' => $odoo_so_id,
 		'odoo_order_id' => $odoo_order_id,
 		'payment_message' => $odoo_order_payment_message,
 		'store_id' => $store_id,

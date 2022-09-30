@@ -20,7 +20,9 @@ define('SD_API_ORDERS', 'http://shopdunk-integration.reach.com.vn/api/v1/orders'
 add_action('plugins_loaded', function () {
 	require dirname(__FILE__) . '/inc/functions.php';
 	require dirname(__FILE__) . '/inc/form-field.php';
-	require dirname(__FILE__) . '/checkout/hooks.php';
+	require dirname(__FILE__) . '/inc/assets.php';
+	require dirname(__FILE__) . '/inc/checkout-fields.php';
+	require dirname(__FILE__) . '/inc/checkout-hooks.php';
 	require dirname(__FILE__) . '/gateways/contact.php';
 	require dirname(__FILE__) . '/gateways/gateway.php';
 	require dirname(__FILE__) . '/admin/admin-settings.php';
@@ -40,15 +42,7 @@ function sd_add_gateway_class($gateways)
 
 
 add_action('wp_loaded', function () {
-	// Store Order ID in session so it can be re-used after payment failure.
-
-	// WC()->session->set( 'order_awaiting_payment', $order_id );
-
-	// Process Payment.
-	// $result = $available_gateways[ $payment_method ]->process_payment( $order_id );
-
-
-
+	
 
 });
 

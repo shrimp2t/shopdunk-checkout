@@ -8,8 +8,8 @@ class WC_SD_Contact_Payment_Gateway extends WC_Payment_Gateway
 	public function __construct()
 	{
 		$this->id = 'sd_contact_payment';
-		$this->method_title = __('Contact Payment', 'woocommerce-other-payment-gateway');
-		$this->title = __('Contact Payment', 'woocommerce-other-payment-gateway');
+		$this->method_title = __('ShopDunk Contact Payment', 'woocommerce-other-payment-gateway');
+		$this->title = __('Liên hệ thanh toán', 'woocommerce-other-payment-gateway');
 		$this->has_fields = false;
 		$this->init_form_fields();
 		$this->init_settings();
@@ -37,7 +37,7 @@ class WC_SD_Contact_Payment_Gateway extends WC_Payment_Gateway
 				'title' 		=> __('Method Title', 'woocommerce-other-payment-gateway'),
 				'type' 			=> 'text',
 				'description' 	=> __('This controls the title', 'woocommerce-other-payment-gateway'),
-				'default'		=> __('Contact Payment', 'woocommerce-other-payment-gateway'),
+				'default'		=> __('Liên hệ thành toán', 'woocommerce-other-payment-gateway'),
 				'desc_tip'		=> true,
 			),
 		);

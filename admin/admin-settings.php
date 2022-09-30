@@ -7,7 +7,7 @@
  **/
 add_filter( 'woocommerce_get_sections_advanced', 'woorei_mysettings_add_section' );
 function woorei_mysettings_add_section( $sections ) {
-	$sections['shopdunk_settings'] = __( 'Shopdunk', 'woorei' );
+	$sections['shopdunk_settings'] = __( 'Shopdunk' );
 	return $sections;
 }
 
@@ -55,6 +55,7 @@ function sd_checkout_settings( $settings, $current_section ) {
 			'custom_attributes' => [
 				'rows' => 8
 			],
+			'css' => 'width: 100%',
 			'desc'     => __( 'Địa chỉ webhook khi order được cập nhật sẽ gửi data đến, Có thể dùng nhiều URL mỗi URL trên một dòng.', 'text-domain' ),
 		);
 
@@ -63,8 +64,11 @@ function sd_checkout_settings( $settings, $current_section ) {
 			'id'       => 'sd_partial_pay_allowed_skus',
 			'type'     => 'textarea',
 			'custom_attributes' => [
-				'rows' => 8
+				'rows' => 8,
+				'cols' => 100,
+				
 			],
+			
 			'desc'     => __( 'SKU(s) sản phẩm có trong đơn hàng. Đơn hàng có sku này mới được phép thanh toán một phần. Mỗi sku trên một dòng.', 'text-domain' ),
 		);
 

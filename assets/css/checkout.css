@@ -2,6 +2,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	text-align: center;
 }
 
 .sd-thankyou-wrap .order-box {
@@ -87,7 +88,8 @@
 	border: none;
 }
 
-.checkout-box {
+.checkout-box,
+.order-box-wrap {
 	background: #fff;
 	border-radius: 8px;
 	;
@@ -238,9 +240,25 @@
 	margin: 2em 0;
 }
 
-.woocommerce-checkout h3 {
+.woocommerce-checkout h3,
+#order_review h3,
+#order_review h2 {
 	font-size: 16px;
 	font-weight: bold;
+	padding: 0em 0 1em;
+	margin: 0 0 20px;
+	border-bottom: 1px solid #ededed;
+	font-weight: 700;
+}
+
+.checkout-box .wc-item-meta {
+	margin: 0px;
+	padding: 0px;
+	font-size: 80%;
+}
+
+.checkout-box .wc-item-meta li {
+	display: flex;
 }
 
 .woocommerce-cart-form,
@@ -282,6 +300,7 @@
 	border: 1px dashed #c5533f;
 	color: #c5533f;
 	background: none;
+	text-align: center;
 }
 
 .checkout-box.payment-header {
@@ -293,4 +312,79 @@
 .woocommerce-cart #payment div.payment_box,
 .woocommerce-checkout #payment div.payment_box {
 	background: none;
+	padding: 0px;
+}
+
+#add_payment_method #payment div.payment_box::before,
+.woocommerce-cart #payment div.payment_box::before,
+.woocommerce-checkout #payment div.payment_box::before {
+	display: none;
+}
+
+.checkout_qr img,
+#add_payment_method #payment ul.payment_methods li .checkout_qr img,
+.woocommerce-cart #payment ul.payment_methods li .checkout_qr img,
+.woocommerce-checkout #payment ul.payment_methods li .checkout_qr img {
+	max-width: 380px;
+	margin: 0 auto;
+	display: block;
+}
+
+.checkout-bank-msg {
+	margin-top: 2em;
+	font-size: 120%;
+}
+
+.order-box-v .order_item,
+.order-box-v .secondary-product {
+	margin-bottom: 1.5em;
+}
+
+.order-box-v .order_item:last-child,
+.order-box-v .secondary-product:last-child {
+	margin-bottom: 0;
+}
+
+.order-box-v .order_item,
+.order-box-v .product-name,
+.order-box-v .secondary-product,
+.order-box-v>div {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.woocommerce-page.woocommerce-checkout #payment div.payment_box,
+.woocommerce.woocommerce-checkout #payment div.payment_box {
+	background-color: transparent;
+}
+.pif .ts-product-image {
+	display: none !important;
+}
+
+.checkout-box-clock {
+	font-size: 38px;
+	font-weight: bold;
+	display: block;
+	text-align: center;
+}
+
+.order-box-v  ul.wc-item-meta{
+	margin: 0px;
+    padding: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+}
+.order-box-v  ul.wc-item-meta li {
+	display: flex;
+	align-items: flex-end;
+}
+.order-box-v  ul.wc-item-meta li p {
+	margin: 0px;
+	padding:0px;
+}
+.order-box-v  ul.wc-item-meta li .wc-item-meta-label {
+	font-weight: normal;
 }

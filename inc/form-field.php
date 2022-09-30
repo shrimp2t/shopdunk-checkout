@@ -4,6 +4,8 @@ if (!function_exists('woocommerce_form_field')) {
 
 	/**
 	 * Outputs a checkout/address form field.
+	 * 
+	 * Hook thay đổi WC checkout form field output
 	 *
 	 * @param string $key Key.
 	 * @param mixed  $args Arguments.

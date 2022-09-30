@@ -1,25 +1,6 @@
 <?php
-
-
-add_action('wp_enqueue_scripts', function () {
-	if (is_checkout()) {
-		$css_ver = @filemtime(SD_CO_PATH . '/assets/css/checkout.css');
-		$js_ver = @filemtime(SD_CO_PATH . '/assets/js/checkout.js');
-		wp_enqueue_script('wc-cart');
-		wp_enqueue_style('sd-checkout', SD_CO_URL . '/assets/css/checkout.css', [], $css_ver);
-		wp_enqueue_script('sd-checkout', SD_CO_URL . '/assets/js/checkout.js', ['jquery'], $js_ver, true);
-
-		$stores = sd_get_data_stores();
-		wp_localize_script('sd-checkout', 'SD_Checkout', [
-			'ajax_url' => admin_url('admin-ajax.php'),
-			'secondary_products' => sd_get_products_secondary(),
-			'stores' => $stores,
-			'provinces' => sd_get_data_provinces(),
-			'quan_huyen' => sd_get_data_quan_huyen(),
-			'phuong_xa' => sd_get_data_phuong_xa(),
-		]);
-	}
-}, 999);
+add_filter( 'jetpack_lazy_images_blacklisted_classes', 'sd_exclude_custom_logo_class_from_lazy_load', 9999 );
+ 
 
 
 function sd_ajax_checkout_handle_action()
@@ -41,14 +22,18 @@ function sd_ajax_checkout_handle_action()
 function sd_ajax_retry_order()
 {
 	$id = wc_clean($_POST['id']);
-
 	$res = sd_send_order_to_odoo_webhook($id, false);
 	wp_send_json($res);
 	die();
 }
 
+// THử lại gửi data sang Odoo với button click thử lại.
 add_action('wp_ajax_sd_retry_order', 'sd_ajax_retry_order');
 add_action('wp_ajax_nopriv_sd_retry_order', 'sd_ajax_retry_order');
+
+/**
+ * GỬi dataa đến ODooo thông qua URL
+ */
 add_action('wp_ajax_sd_checkout_handle_action', 'sd_ajax_checkout_handle_action');
 add_action('wp_ajax_nopriv_sd_checkout_handle_action', 'sd_ajax_checkout_handle_action');
 
@@ -97,7 +82,7 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
 
 
 /**
- * Change Woocommerce Template
+ * Change Woocommerce Templates
  *
  * @param [type] $template
  * @param [type] $template_name
@@ -108,19 +93,20 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
  */
 function sd_change_payment_template($template, $template_name, $args, $template_path, $default_path)
 {
-
 	$file = SD_CO_PATH . '/templates/' . $template_name;
 	if (file_exists($file)) {
 		return $file;
 	}
-
 	return $template;
 }
 add_filter('wc_get_template', 'sd_change_payment_template', 9999, 5);
 
 
-
-add_filter('woocommerce_valid_order_statuses_for_payment', 'sd_custom_status_valid_for_payment', 10, 2);
+/**
+ * 
+ * Những Satus nào được phép thánh toán lại khi đã thực hiện xong bước đặt hàng.
+ * 
+ */
 function sd_custom_status_valid_for_payment($statuses, $order)
 {
 
@@ -130,16 +116,21 @@ function sd_custom_status_valid_for_payment($statuses, $order)
 
 	return $statuses;
 }
+add_filter('woocommerce_valid_order_statuses_for_payment', 'sd_custom_status_valid_for_payment', 10, 2);
 
 
-add_filter('wc_order_statuses', 'sd_custom_order_status');
+/**
+ * Add more order status for WC
+ *
+ * @param [type] $order_statuses
+ * @return void
+ */
 function sd_custom_order_status($order_statuses)
 {
 	$order_statuses['wc-partial-payment'] = _x('Partial payment', 'Order status', 'woocommerce');
 	$order_statuses['wc-partial-processing'] = _x('Processing partial payment', 'Order status', 'woocommerce');
 	return $order_statuses;
 }
-
 function sd_woocommerce_register_shop_order_post_statuses($status)
 {
 	$status['wc-partial-payment'] = array(
@@ -163,335 +154,13 @@ function sd_woocommerce_register_shop_order_post_statuses($status)
 	);
 	return $status;
 }
-
+add_filter('wc_order_statuses', 'sd_custom_order_status');
 add_filter('woocommerce_register_shop_order_post_statuses', 'sd_woocommerce_register_shop_order_post_statuses');
 
 
 
-/**
- * @see woocommerce_form_field()
- */
-function sd_checkout_fields($groups)
-{
-
-	// $groups['billing']['label'] ='Thông tin khách hàng';
-	// foreach ($groups  as $id => $f) {
-	// 	var_dump($id);
-	// 	var_dump($f);
-	// }
-
-	$session_data = WC()->session->get('sd_checkout_data', []);
-
-	$groups['billing']['sd_billing_title'] = [
-		'label' => "Xưng danh",
-		'type' => "radio",
-		'options' => [
-			'Anh' => 'Anh',
-			'Chị' => 'Chị',
-		],
-		'class' => 'form-row-wide',
-		'default' => sd_get_value_from_array('sd_billing_title', $session_data, 'Anh'),
-		'value' => 'Anh',
-		'required' => true,
-		'priority' => 4,
-	];
-
-	$groups['billing']['billing_first_name']['class'] = 'form-row-wide';
-	$groups['shipping']['shipping_first_name']['class'] = 'form-row-wide';
-	$groups['shipping']['shipping_address_1']['required'] = false;
-	$groups['shipping']['shipping_address_1']['class'] = 'form-row-half';
-	$groups['shipping']['shipping_state']['required'] = false;
-	$groups['billing']['billing_email']['required'] = false;
-
-	$groups['billing']['billing_country']['type'] = 'hidden';
-	$groups['billing']['billing_country']['value'] = 'VN';
-
-	unset($groups['billing']['billing_last_name']);
-	unset($groups['billing']['billing_company']);
-
-	unset($groups['billing']['billing_address_2']);
-	unset($groups['billing']['billing_postcode']);
-	unset($groups['billing']['billing_state']);
-	unset($groups['billing']['billing_address_1']);
-	unset($groups['billing']['billing_city']);
-
-
-	unset($groups['shipping']['shipping_first_name']);
-	unset($groups['shipping']['shipping_last_name']);
-	unset($groups['shipping']['shipping_company']);
-	unset($groups['shipping']['shipping_country']);
-	unset($groups['shipping']['shipping_address_2']);
-	unset($groups['shipping']['shipping_postcode']);
-	unset($groups['shipping']['shipping_city']);
-	unset($groups['shipping']['shipping_state']);
-
-
-	$groups['order']['order_comments']['type'] = 'text';
-
-
-	$groups['shipping']['sd_shipping_method'] = [
-		'label' => "Nhận hàng",
-		'description' => "<span class='note'>Lưu ý*:</span> Mọi đơn hàng giao tận nơi cần thanh toán 100% giá trị trước khi giao hàng.",
-		'type' => "radio",
-		'class' => 'form-row-wide',
-		'options' => [
-			'store' => 'Nhận tại',
-			'ship' => 'Giao tận nơi',
-		],
-		'default' =>  sd_get_value_from_array('sd_shipping_method', $session_data, 'store'),
-		'required' => false,
-		'priority' => 5,
-	];
-
-	$stores = sd_get_data_stores();
-	// $options = sd_array_to_select_options($stores, 'address');
-	$store_groups_options = sd_groups_for_select_by($stores, 'address', 'province', 'all');
-
-	$groups['shipping']['sd_store_area'] = [
-		'label' => "Khu vực",
-		'type' => "select",
-		'class' => 'form-row-wide',
-		'options' => $store_groups_options['options'],
-		'default' => sd_get_value_from_array('sd_store_area', $session_data, 'Hà Nội'),
-		'required' => false,
-		'priority' => 6,
-	];
-
-	$groups['shipping']['sd_store_id'] = [
-		'label' => "Chọn cửa hàng",
-		'type' => "select",
-		'class' => 'form-row-wide',
-		'options' => $store_groups_options['groups']['Hà Nội']['options'],
-		'default' => sd_get_value_from_array('sd_store_id', $session_data, '001'),
-		'required' => false,
-		'priority' => 7,
-	];
-
-
-	$provinces = sd_array_to_select_options(sd_get_data_provinces(), 'name');
-	$groups['shipping']['sd_shipping_province_id'] = [
-		'label' => "Tỉnh/Thành Phố",
-		'type' => "select",
-		'class' => 'form-row-half',
-		'options' => $provinces,
-		'default' => sd_get_value_from_array('sd_shipping_province_id', $session_data, '01'),
-		'required' => false,
-		'priority' => 7,
-	];
-
-	$groups['shipping']['sd_shipping_qh_id'] = [
-		'label' => "Quận/huyện",
-		'type' => "select",
-		'class' => 'form-row-half',
-		'options' => [
-			'' => 'Chọn quận/huyện',
-		],
-		'default' => '',
-		'required' => false,
-		'priority' => 7,
-	];
-	$groups['shipping']['sd_shipping_px_id'] = [
-		'label' => "Phường/Xã",
-		'type' => "select",
-		'class' => 'form-row-half',
-		'options' => [
-			'' => 'Chọn phường/xã',
-		],
-		'default' => '',
-		'required' => false,
-		'priority' => 7,
-	];
-
-
-	$groups['secondary'] = [];
-	$groups['secondary']['secondary_check'] = [
-		'label' => "Sản phẩm thay thế",
-		'description' => "Khi sản phẩm không còn hàng, tôi sẽ mua sản phẩm thay thế bên dưới.",
-		'type' => "checkbox",
-		'class' => 'form-row-wide',
-		'default' => sd_get_value_from_array('secondary_check', $session_data, ''),
-		'required' => false,
-		'priority' => 7,
-	];
-
-
-
-	$products =  sd_get_products_secondary();
-	$product_options = array_combine(array_keys($products), array_keys($products));
-	$product_options = array_merge(['' => 'Chọn sản phẩm'], $product_options);
-
-	for ($i = 1; $i <= 2; $i++) {
-		$groups['secondary']['secondary_p' . $i . '_name'] = [
-			'label' => "Sản phẩm " . $i,
-			'type' => "select",
-			'options' => $product_options,
-			'custom_attributes' => [
-				'data-i' => $i
-			],
-			'class' => 'secondary_ps_field secondary_ps_name form-row-wide',
-			'default' => sd_get_value_from_array('secondary_p' . $i . '_name', $session_data, ''),
-			'required' => false,
-			'priority' => 7,
-		];
-		$groups['secondary']['secondary_p' . $i . '_color'] = [
-			'label' => "",
-			'type' => "select",
-			'options' => [
-				'' => 'Chọn màu'
-			],
-			'custom_attributes' => [
-				'data-i' => $i
-			],
-			'class' => 'secondary_ps_field form-row-half',
-			'default' => sd_get_value_from_array('secondary_p' . $i . '_color', $session_data, ''),
-			'required' => false,
-			'priority' => 7,
-		];
-		$groups['secondary']['secondary_p' . $i . '_storage'] = [
-			'label' => "",
-			'type' => "select",
-			'options' => [
-				'' => 'Chọn dung lượng'
-			],
-			'custom_attributes' => [
-				'data-i' => $i
-			],
-			'class' => 'secondary_ps_field form-row-half',
-			'default' => sd_get_value_from_array('secondary_p' . $i . '_storage', $session_data, ''),
-			'required' => false,
-			'priority' => 7,
-		];
-	}
-
-
-	$groups['more'] = [];
-
-	$groups['shipping']['more_shipping_info'] = [
-		'label' => "Gọi người khác nhận hàng (nếu có)",
-		'type' => "checkbox",
-		'class' => 'form-row-wide',
-		'default' => sd_get_value_from_array('more_shipping_info', $session_data, ''),
-		'required' => false,
-		'priority' => 88
-	];
-
-	$groups['shipping']['shipping_first_name'] = [
-		'placeholder' => "Họ và tên người nhận",
-		'type' => "text",
-		'class' => 'more_shipping_field form-row-half',
-		'default' => '',
-		'required' => false,
-		'priority' => 88
-	];
-
-	$groups['shipping']['shipping_phone'] = [
-		'placeholder' => "Số điện thoại",
-		'type' => "text",
-		'class' => 'more_shipping_field form-row-half',
-		'default' => '',
-		'required' => false,
-		'priority' => 88
-	];
-
-	$groups['shipping']['vat_check'] = [
-		'label' => "Xuất hóa đơn công ty",
-		'type' => "checkbox",
-		'class' => 'form-row-wide',
-		'default' => sd_get_value_from_array('vat_check', $session_data, ''),
-		'required' => false,
-		'priority' => 99,
-	];
-
-	$groups['shipping']['vat_cty'] = [
-		'placeholder' => "Tên công ty",
-		'type' => "text",
-		'class' => 'vat_field form-row-wide',
-		'default' => sd_get_value_from_array('vat_cty', $session_data, ''),
-		'required' => false,
-		'priority' => 99,
-	];
-
-	$groups['shipping']['vat_address'] = [
-		'placeholder' => "Địa chỉ công ty",
-		'type' => "text",
-		'class' => 'vat_field form-row-wide',
-		'default' => sd_get_value_from_array('vat_address', $session_data, ''),
-		'required' => false,
-		'priority' => 99,
-	];
-
-	$groups['shipping']['vat_tax_num'] = [
-		'placeholder' => "Mã số thuế",
-		'type' => "text",
-		'class' => 'vat_field form-row-wide',
-		'default' => sd_get_value_from_array('vat_tax_num', $session_data, ''),
-		'required' => false,
-		'priority' => 99,
-	];
-
-
-
-
-
-
-	return $groups;
-}
-
-add_filter('woocommerce_checkout_fields', 'sd_checkout_fields');
-
-
 add_filter('woocommerce_cart_needs_shipping', '__return_true', 9999);
 add_filter('woocommerce_cart_needs_shipping_address', '__return_true', 9999);
-
-
-
-function sd_add_checkout_data($data)
-{
-
-	if (isset($data['vat_check']) && $data['vat_check'] == 1) {
-		if (!isset($data['vat_cty']) || !$data['vat_cty']) {
-			wc_add_notice('Xuất hóa đơn đỏ thiếu tên công ty.', 'error');
-		}
-		if (!isset($data['vat_address']) || !$data['vat_address']) {
-			wc_add_notice('Xuất hóa đơn đỏ thiếu địa chỉ công ty.', 'error');
-		}
-		if (!isset($data['vat_tax_num']) || !$data['vat_tax_num']) {
-			wc_add_notice('Xuất hóa đơn đỏ thiếu mã số thuế.', 'error');
-		}
-	}
-
-	if (isset($data['sd_shipping_method']) &&  $data['sd_shipping_method'] == 'ship') {
-
-		if (!isset($data['sd_shipping_province_id']) || !$data['sd_shipping_province_id']) {
-			wc_add_notice('Chọn tỉnh/thành phố.', 'error');
-		}
-		if (!isset($data['sd_shipping_qh_id']) || !$data['sd_shipping_qh_id']) {
-			wc_add_notice('Chọn quận/huyện.', 'error');
-		}
-		if (!isset($data['sd_shipping_px_id']) || !$data['sd_shipping_qh_id']) {
-			wc_add_notice('Chọn xã/phường.', 'error');
-		}
-		if (!isset($data['shipping_address_1']) || !$data['shipping_address_1']) {
-			wc_add_notice('Thiếu địa chỉ nhận hàng.', 'error');
-		}
-	} else {
-		if (!isset($data['sd_store_id']) || !$data['sd_store_id']) {
-			wc_add_notice('Hãy chọn cửa hàng.', 'error');
-		}
-	}
-
-	// // wc_add_notice();
-	// var_dump($data);
-	// die();
-
-	// Validate field here
-
-
-	WC()->session->set('sd_checkout_data', $data);
-	return  $data;
-}
-
-add_filter('woocommerce_checkout_posted_data', 'sd_add_checkout_data',  9999);
 
 
 // add_action( 'woocommerce_checkout_create_order', $order, $data );
@@ -943,6 +612,7 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null, $retry_id =  '
 	$success = false;
 	$message = '';
 	$id = false;
+	$so_id = false;
 	if (!isset($body['error'])) {
 		$success = true;
 		// Try to get id;
@@ -952,12 +622,18 @@ function sd_send_order_to_odoo_webhook($order_id, $order =  null, $retry_id =  '
 			$id =  $body['id'];
 			$payment_message =  $body['payment_message'];
 		}
+		
 		if (!$id && isset($body['result']['data']['id'])) {
 			$id = $body['result']['data']['id'];
 			$payment_message = $body['result']['data']['payment_message'];
 		}
 
+		if (isset($body['result']['data']['so_id'])) {
+			$so_id = $body['result']['data']['so_id'];
+		}
+
 		if ($id) {
+			$order->add_meta_data('_odoo_so_id', $so_id, true);
 			$order->add_meta_data('_odoo_order_id', $id, true);
 			$order->add_meta_data('_odoo_order_payment_message', $payment_message, true);
 			$has_save_meta = true;

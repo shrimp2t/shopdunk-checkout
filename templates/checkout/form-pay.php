@@ -24,16 +24,19 @@ defined('ABSPATH') || exit;
 $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 // $order_button_text = 'Thanh toán';
 $extra = sd_get_order_extra_data($order);
+$extra['phone'] = $order->get_billing_phone();
 $GLOBALS['sd_checkout_order_extra'] = $extra;
 
 // var_dump($extra);
 
-if (!$extra['odoo_order_id'] and 1== 2) {
+$order_button_text = 'Tôi đã hoàn tất việc chuyển khoản đặt cọc 1.000.000';
+
+if (!$extra['odoo_order_id']) {
 ?>
 	<div id="order_review" class="checkout-error">
 		<div class="checkout-box  payment-header">
 			<div class="payment-icon-error"></div>
-			<h2>Đặt hàng thất bại.</h2>
+			<h2>Tạo đơn hàng thất bại.</h2>
 			<p><?php echo esc_html('Có lỗi xảy ra trong quá trình đặt hàng. Xin thử lại.') ?></p>
 			<div class="sd-retry-pay-msg hide"></div>
 			<div class="sd-retry-pay">
@@ -44,16 +47,17 @@ if (!$extra['odoo_order_id'] and 1== 2) {
 <?php
 } else {
 ?>
+
+	<div class="checkout-box payment-header">
+		<div class="payment-icon-success"></div>
+		<h2>Tạo đơn hàng thành công.</h2>
+		<p><?php echo esc_html(sprintf('Cám ơn %s %s đã cho ShopDunk cơ hội được phục vụ', $extra['billing_title'], $order->get_billing_first_name())) ?></p>
+	</div>
+
 	<form id="order_review" method="post">
 
-		<div class="checkout-box payment-header">
-			<div class="payment-icon-success"></div>
-			<h2>Tạo đơn hàng thành công.</h2>
-			<p><?php echo esc_html(sprintf('Cám ơn %s %s đã cho ShopDunk cơ hội được phục vụ', $extra['billing_title'], $order->get_billing_first_name())) ?></p>
-		</div>
-
 		<div class="checkout-box  payment-billing">
-			<div class="oid">Mã đơng hàng: <strong><?php echo esc_html($extra['odoo_order_id']); ?></strong></div>
+			<div class="oid">Mã đơng hàng: <strong><?php echo esc_html($extra['odoo_so_id']); ?></strong></div>
 			<?php if ($extra['shipping_method'] == 'ship') { ?>
 				<div class="ship-addr">Giao hàng tận nơi: <strong><?php echo esc_html($extra['full_shipping_address']); ?></strong></div>
 
@@ -82,6 +86,14 @@ if (!$extra['odoo_order_id'] and 1== 2) {
 		<?php if (in_array($order->get_status(), ['pending'])) { ?>
 			<div class="checkout-box  payment-order-status-pending">Đơn hàng chưa được thanh toán.</div>
 		<?php } ?>
+
+		<div class="checkout-box">
+			<div class="checkout-box-clock">59:40</div>
+			Đơn hàng được hoàn thành khi bạn chuyển khoản trong vòng 60p Kể từ thời điểm đặt hàng (<?php echo $order->get_date_created(); ?>).
+			Nếu trong 60p việc đặt cọc không hoàn tất, đơn hàng sẽ bị huỷ, khi đó bạn cần tạo lại đơn hàng mới.
+		</div>
+
+
 		<?php
 		/*
 		$allow_pay = sd_allow_partial_pay($order);
@@ -105,7 +117,7 @@ if (!$extra['odoo_order_id'] and 1== 2) {
 			</div>
 		<?php } 
 		*/
-		
+
 		?>
 		<div id="checkout-payment-gate-ways" class="checkout-box  payment-box">
 			<h2>Phương thức thanh toán</h2>
@@ -124,27 +136,26 @@ if (!$extra['odoo_order_id'] and 1== 2) {
 					</ul>
 				<?php endif; ?>
 			</div>
+
+			<div class="fcheckout-box  form-row">
+				<input type="hidden" name="woocommerce_pay" value="1" />
+				<?php wc_get_template('checkout/terms.php'); ?>
+				<?php do_action('woocommerce_pay_order_before_submit'); ?>
+				<?php echo apply_filters('woocommerce_pay_order_button_html', '<button type="submit" class="button alt" id="place_order" value="' . esc_attr($order_button_text) . '" data-value="' . esc_attr($order_button_text) . '">' . esc_html($order_button_text) . '</button>'); // @codingStandardsIgnoreLine 
+				?>
+				<?php do_action('woocommerce_pay_order_after_submit'); ?>
+				<?php wp_nonce_field('woocommerce-pay', 'woocommerce-pay-nonce'); ?>
+			</div>
 		</div>
 
 
-		<div class="fcheckout-box  form-row">
-			<input type="hidden" name="woocommerce_pay" value="1" />
-
-			<?php wc_get_template('checkout/terms.php'); ?>
-
-			<?php do_action('woocommerce_pay_order_before_submit'); ?>
-
-			<?php echo apply_filters('woocommerce_pay_order_button_html', '<button type="submit" class="button alt" id="place_order" value="' . esc_attr($order_button_text) . '" data-value="' . esc_attr($order_button_text) . '">' . esc_html($order_button_text) . '</button>'); // @codingStandardsIgnoreLine 
-			?>
-			<?php do_action('woocommerce_pay_order_after_submit'); ?>
-			<?php wp_nonce_field('woocommerce-pay', 'woocommerce-pay-nonce'); ?>
-		</div>
 
 
-		<div class="payment-order-items">
+
+		<div class="payment-order-items fcheckout-box checkout-box">
 			<h2>Sản phẩm đã đặt</h2>
-			<table class="shop_table">
-				<tbody>
+			<div class="shop_table">
+				<div class="tbody">
 					<?php if (count($order->get_items()) > 0) : ?>
 						<?php foreach ($order->get_items() as $item_id => $item) : ?>
 							<?php
@@ -152,8 +163,8 @@ if (!$extra['odoo_order_id'] and 1== 2) {
 								continue;
 							}
 							?>
-							<tr class="<?php echo esc_attr(apply_filters('woocommerce_order_item_class', 'order_item', $item, $order)); ?>">
-								<td class="product-name">
+							<div class="tr <?php echo esc_attr(apply_filters('woocommerce_order_item_class', 'order_item', $item, $order)); ?>">
+								<div class="td product-name">
 									<?php
 									echo wp_kses_post(apply_filters('woocommerce_order_item_name', $item->get_name(), $item, false));
 									do_action('woocommerce_order_item_meta_start', $item_id, $item, $order, false);
@@ -161,46 +172,47 @@ if (!$extra['odoo_order_id'] and 1== 2) {
 
 									do_action('woocommerce_order_item_meta_end', $item_id, $item, $order, false);
 									?>
-								</td>
-								<td class="product-quantity"><?php echo apply_filters('woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf('&times;&nbsp;%s', esc_html($item->get_quantity())) . '</strong>', $item); ?></td><?php // @codingStandardsIgnoreLine 
-																																																																?>
-								<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal($item); ?></td><?php // @codingStandardsIgnoreLine 
-																															?>
-							</tr>
+								</div>
+								<div class="td product-quantity"><?php echo apply_filters('woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf('&times;&nbsp;%s', esc_html($item->get_quantity())) . '</strong>', $item); ?></div><?php // @codingStandardsIgnoreLine 
+																																																																	?>
+								<div class="td product-subtotal"><?php echo $order->get_formatted_line_subtotal($item); ?></div><?php // @codingStandardsIgnoreLine 																				
+																																?>
+							</div>
 						<?php endforeach; ?>
 					<?php endif; ?>
-				</tbody>
-			</table>
+				</div>
+			</div>
 		</div>
 
 
 		<?php if ($extra['secondary_check']) : ?>
-			<div class="payment-secondary-items">
+			<div class="payment-secondary-items fcheckout-box checkout-box">
 				<h2>Sản phẩm thay thế</h2>
-				<table class="shop_table">
-					<tbody>
+				<div class="shop_table">
+					<div class="tbody">
 
 						<?php for ($i = 1; $i <= 2; $i++) :
 							if (!$extra['secondary_p' . $i . '_name']) {
 								continue;
 							}
 						?>
-							<tr class="order_item">
-								<td class="product-name">
+							<div class="tr order_item">
+								<div class="td product-name">
 									<ul class="wc-item-meta">
 										<?php echo esc_html($extra['secondary_p' . $i . '_name']); ?>
 										<li><strong class="wc-item-meta-label">Màu:</strong>
-											<p><?php echo esc_html($extra['secondary_p' . $i . '_color']); ?></p>
+											<div><?php echo esc_html($extra['secondary_p' . $i . '_color']); ?></div>
 										</li>
 										<li><strong class="wc-item-meta-label">Dung lượng:</strong>
-											<p><?php echo esc_html($extra['secondary_p' . $i . '_storage']); ?></p>
+											<div><?php echo esc_html($extra['secondary_p' . $i . '_storage']); ?></div>
 										</li>
 									</ul>
-								</td>
-							</tr>
+								</div>
+								<div class="td"></div>
+							</div>
 						<?php endfor; ?>
-					</tbody>
-				</table>
+					</div>
+				</div>
 			</div>
 		<?php endif; ?>
 

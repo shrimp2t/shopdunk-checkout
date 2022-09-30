@@ -8,8 +8,8 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 	public function __construct()
 	{
 		$this->id = 'sd_other_payment';
-		$this->method_title = __('Custom Payment', 'woocommerce-other-payment-gateway');
-		$this->title = __('Custom Payment', 'woocommerce-other-payment-gateway');
+		$this->method_title = __('ShopDunk Bank Transfer Payment', 'woocommerce-other-payment-gateway');
+		$this->title = __('Chuyển khoảng ngân hàng.', 'woocommerce-other-payment-gateway');
 		$this->has_fields = true;
 		$this->init_form_fields();
 		$this->init_settings();
@@ -139,8 +139,7 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 		global $sd_checkout_order_extra;
 	?>
 		<fieldset>
-			<p class="form-row form-row-wide">
-				<label for="<?php echo $this->id; ?>-admin-note"><?php echo ($this->description); ?> <?php if ($this->text_box_required === 'yes') : ?> <span class="required">*</span> <?php endif; ?></label>
+			<div class="form-row form-row-wide">
 				<?php
 				if ($sd_checkout_order_extra) {
 
@@ -149,10 +148,10 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 					$bank_name = get_option('sd_default_bank_name');
 					if ($sd_checkout_order_extra['store__account']) {
 						$account_number =  $sd_checkout_order_extra['store__account'];
-						$bank_name = 'TECHCOMBANK - CN ĐÔNG ĐÔ, HÀ NỘI';
+						$bank_name = 'TECHCOMBANK';
 					}
 
-					if ( $sd_checkout_order_extra['pay_method'] !='ship' && $sd_checkout_order_extra['store_id'] ) {
+					if ($sd_checkout_order_extra['pay_method'] != 'ship' && $sd_checkout_order_extra['store_id']) {
 						$store = $sd_checkout_order_extra['store_id'];
 					}
 
@@ -167,29 +166,38 @@ class WC_SD_Bank_Transfer_Payment_Gateway extends WC_Payment_Gateway
 						$amount = $sd_checkout_order_extra['total'];
 					}
 
-				?>
-			<div class="checkout_qr">
-				<img src="https://img.vietqr.io/image/970407-<?php echo esc_attr($account_number) ?>-HHxRqO.jpg?amount=<?php echo esc_attr($amount); ?>&addInfo=<?php echo esc_attr($payment_message); ?>" alt="" />
-			</div>
-			<p>
-				Số tài khoản: <?php echo esc_html($account_number); ?>
-			</p>
-			<p>
-				Ngân hàng: <?php echo esc_html($bank_name); ?>
-			</p>
-			<p>
-				Chủ tài khoản: CÔNG TY CỔ PHẦN HESMAN VIỆT NAM.
-			</p>
-			<p>
-				Nội dung chuyển khoản: <?php echo esc_html($sd_checkout_order_extra['payment_message']); ?>
-			</p>
+					$amount = 1000000;
 
-		<?php
+					$payment_message = $sd_checkout_order_extra['odoo_so_id'] . '-' . $sd_checkout_order_extra['phone'];
+
+				?>
+					<div class="checkout_qr">
+						<img class="skip-lazy not-lazy" src="https://img.vietqr.io/image/970407-<?php echo esc_attr($account_number) ?>-HHxRqO.jpg?amount=<?php echo esc_attr($amount); ?>&addInfo=<?php echo esc_attr($payment_message); ?>" alt="" />
+					</div>
+					<div class="checkout-bank-msg">
+						<p>
+							Số tài khoản: <strong><?php echo esc_html($account_number); ?></strong>
+						</p>
+						<p>
+							Ngân hàng: <strong><?php echo esc_html($bank_name); ?></strong>
+						</p>
+						<p>
+							Chủ tài khoản: <strong>CÔNG TY CỔ PHẦN HESMAN VIỆT NAM.</strong>
+						</p>
+						<p>
+							Nội dung chuyển khoản: <strong><?php echo esc_html($payment_message); ?></strong>
+						</p>
+						<p>
+							Số tiền: <strong><?php echo wc_price($amount); ?></strong>
+						</p>
+					</div>
+
+				<?php
 				}
 
-		?>
-		</p>
-		<div class="clear"></div>
+				?>
+			</div>
+			<div class="clear"></div>
 		</fieldset>
 <?php
 	}

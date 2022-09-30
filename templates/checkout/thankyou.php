@@ -18,10 +18,10 @@
 
 defined('ABSPATH') || exit;
 
-if ( ! $order  ) {
-	?>
+if (!$order) {
+?>
 	<div class="pay-order-not-found">Không tìm thấy đơn hàng</div>
-	<?php
+<?php
 	return;
 }
 
@@ -47,15 +47,15 @@ $totals = $order->get_order_item_totals();
 			<div class="icon-success"></div>
 
 			<?php if ($order->has_status('failed')) : ?>
-				<h2>Mua hàng thất bại!</h2>
+				<h2>Đặt hàng thất bại!</h2>
 				<p>Chúng tôi rất tiếc việc mua hàng đã thất bại. Xin thử lại!</p>
 				<p class="woocommerce-notice woocommerce-notice--error woocommerce-thankyou-order-failed-actions">
 					<a href="<?php echo esc_url($order->get_checkout_payment_url()); ?>" class="button pay"><?php esc_html_e('Pay', 'woocommerce'); ?></a>
 				</p>
 			<?php else : ?>
-				<h2>Mua hàng thành công!</h2>
+				<h2>Đặt hàng thành công!</h2>
 				<p><?php
-					echo esc_html(sprintf('Cám ơn %s %s đã tin tưởng và tạo cơ hội để chúng tôi được phục vụ.', $extra['billing_title'], $order->get_billing_first_name())) ?></p>
+					echo sprintf('Nếu đã hoàn tất việc chuyển khoản, bạn sẽ nhận được xác nhận được xác nhận từ ShopDunk, thông thường trong vòng 60p qua một trong các phương thức sau: SMS, Zalo hoặc Email.', $extra['odoo_so_id'], $order->get_billing_first_name()); ?></p>
 				</p>
 			<?php endif; ?>
 
@@ -67,11 +67,13 @@ $totals = $order->get_order_item_totals();
 			<div class="order-box">
 				<div class="order-box-l">Thông tin đơn hàng</div>
 				<div class="order-box-v">
-					<div><strong><?php echo esc_html(trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name())) ?></strong></div>
-					<div>SĐT: <?php echo esc_html(trim($order->get_billing_phone())) ?></div>
-					<div>#: <strong><?php echo esc_html($extra['odoo_order_id'] ? $extra['odoo_order_id'] : $extra['id']); ?></strong></div>
-					<div><?php echo wc_format_datetime($order->get_date_created()); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-							?></div>
+					<div>
+						<div><strong><?php echo esc_html(trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name())) ?></strong></div>
+						<div>SĐT: <?php echo esc_html(trim($order->get_billing_phone())) ?></div>
+						<div>Mã đơn hàng: <strong><?php echo esc_html($extra['odoo_order_id'] ? $extra['odoo_so_id'] : $extra['id']); ?></strong></div>
+						<div><?php echo wc_format_datetime($order->get_date_created()); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+								?></div>
+					</div>
 				</div>
 			</div>
 
@@ -159,14 +161,14 @@ $totals = $order->get_order_item_totals();
 					<div class="order-box-l">Sản phẩm thay thế</div>
 					<div class="order-box-v">
 						<?php for ($i = 1; $i <= 2; $i++) :
-							if ( $extra['secondary_p'.$i.'_name']   ):
-							?>
-							<div class="secondary-product">
-								<div class="n">Sản phẩm <?php echo $i; ?>: <strong><?php echo esc_html( $extra['secondary_p'.$i.'_name'] ); ?></strong></div>
-								<div class="c">Màu: <span><?php echo esc_html( $extra['secondary_p'.$i.'_color'] ); ?></span></div>
-								<div class="s">Dung lượng: <span><?php echo esc_html( $extra['secondary_p'.$i.'_storage'] ); ?></span></div>
-							</div>
-						<?php endif; ?>
+							if ($extra['secondary_p' . $i . '_name']) :
+						?>
+								<div class="secondary-product">
+									<div class="n">Sản phẩm <?php echo $i; ?>: <strong><?php echo esc_html($extra['secondary_p' . $i . '_name']); ?></strong></div>
+									<div class="c">Màu: <span><?php echo esc_html($extra['secondary_p' . $i . '_color']); ?></span></div>
+									<div class="s">Dung lượng: <span><?php echo esc_html($extra['secondary_p' . $i . '_storage']); ?></span></div>
+								</div>
+							<?php endif; ?>
 						<?php endfor; ?>
 					</div>
 				</div>
@@ -199,9 +201,10 @@ $totals = $order->get_order_item_totals();
 
 			<div class="order-box noti">
 				<div class="order-box-c">
-					<p>Lưu ý*: Quý khách vui lòng lưu lại thông tin để thuận tiện cho việc nhận hàng.<br />
+					<p><span class="noti">Lưu ý*:</span><br/>
+					Quý khách vui lòng lưu lại thông tin để thuận tiện cho việc nhận hàng.<br />
 						ShopDunk sẽ liên hệ sớm nhất đến Quý khách ngay khi có sản phẩm.<br />
-						Số tiền đặt cọc của quý khách sẽ được trừ thằng vào giá sản phẩm khi Quý khách nhận hàng và thanh toán.
+						Số tiền đặt cọc của quý khách sẽ được trừ thẳng vào giá sản phẩm khi Quý khách nhận hàng và thanh toán.
 					</p>
 				</div>
 			</div>
